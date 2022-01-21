@@ -1,0 +1,25 @@
+{
+  "name": "movieSite",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "Math": "0.0.1-security",
+    "babel": "^6.23.0",
+    "gsap": "^3.9.1",
+    "regenerator-runtime": "^0.13.9",
+    "three": "^0.136.0",
+    "three-orbit-viewer": "^69.3.1",
+    "three-vignette-background-updated": "^1.0.0"
+  },
+  "devDependencies": {
+    "cssnano": "^5.0.15",
+    "postcss": "^8.4.5"
+  }
+}
