@@ -6,14 +6,17 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass'
 
 class ThreeInit {
-  constructor({ orbital, shadows, specialGrain, noGrain, noFog, mobile }) {
+  constructor({ orbital, shadows, specialBackground, noBackground, noFog, mobile }) {
+    this.container = document.querySelector(".three")
     this.shadows = shadows
     this.scene = new THREE.Scene();
-    this.specialGrain = specialGrain
-    this.noGrain = noGrain
+    this.specialBackground = specialBackground
+    this.noBackground = noBackground
     this.noFog = noFog
     this.mobile = mobile
-    this.camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+    this.aspect = this.container.clientWidth / this.container.clientHeight
+    // console.log(this.aspect)
+    this.camera = new THREE.PerspectiveCamera(this.mobile ? 85 : 65, this.aspect, 0.1, 1000);
 
     this.camera.position.x = 4.857694276842902
     this.camera.position.y = 6.560754567944053
@@ -26,36 +29,65 @@ class ThreeInit {
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       powerPreference: 'high-performance',
-      alpha: this.mobile ? true : false
+      alpha: true
     });
-    this.renderer.setSize(window.innerWidth, window.innerHeight)
+    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight)
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.physicallyCorrectLights = true
-    // this.renderer.gammaOutPut = true
-    // this.renderer.outputEncoding = THREE.sRGBEncoding
-    // this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
-    // this.renderer.shadowMap.enabled = false
     this.renderer.toneMapping = THREE.NoToneMapping
     this.renderer.toneMappingExposure = 1
     if (this.shadows) {
       this.renderer.shadowMap.enabled = true;
     }
-    document.body.appendChild(this.renderer.domElement);
+    this.container.appendChild(this.renderer.domElement);
     window.addEventListener("resize", this.resize.bind(this));
     if (orbital) {
       this.addOrbitalCam()
     }
-    if (this.specialGrain) {
-      this.addGrain()
-    }
-    else {
-      if (!this.noGrain) {
+    if (!this.noBackground) {
+      if (this.specialBackground) {
+        this.addGrain()
+        console.log('ok')
+      }
+      else {
         this.addBackground()
+        console.log('ok')
+
       }
     }
+    
     if (!this.noFog) {
       this.addFog()
     }
+    // this.addGridHelper()
+  }
+
+  addShape() {
+    let floorGeometry = new THREE.PlaneGeometry(20, 20);
+
+
+    let loader = new THREE.TextureLoader()
+    let basecolor = loader.load('marble/White_Marble_005_COLOR.jpg')
+    let occMap = loader.load('marble/White_Marble_005_OCC.jpg')
+    let roughnessMap = loader.load('marble/White_Marble_005_ROUGH.jpg')
+    // let basecolor = loader.load('marble/White_Marble_005_COLOR.jpg')
+
+
+
+
+    let floorMaterial = new THREE.MeshStandardMaterial({
+      map: basecolor,
+    });
+
+    let floor = new THREE.Mesh(floorGeometry, floorMaterial)
+    floor.position.y = 0.1;
+    floor.position.z = 0;
+    floor.rotation.x = -Math.PI / 2;
+    floor.castShadow = true;
+    floor.receiveShadow = true
+    floor.matrixAutoUpdate = false;
+    floor.updateMatrix();
+    this.scene.add(floor)
   }
 
   addGrain() {
@@ -64,93 +96,43 @@ class ThreeInit {
     this.composer.addPass(renderPass);
     //custom shader pass
     var vertShader = `
-      precision highp float; 
-
-      attribute vec3 aPos;
-      attribute vec2 aUvs;
-
       varying vec2 vUv;
-
-      void main(){
-          vUv = aUvs;
-          gl_Position = vec4(aPos, 1.0);
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
       }
     `
     var fragShader = `
-      precision highp float; 
-
-      uniform sampler2D uTexture;
-      uniform float uTime;
-      uniform vec2 uRez;
-
-      uniform float uOpacity;
-      uniform float uDitherWidth;
-      uniform float uDitherSteps;
-      uniform float uSaturation;
-
+      uniform float time;
+      uniform float nIntensity;
+      uniform float sIntensity;
+      uniform float sCount;
+      uniform sampler2D tDiffuse;
       varying vec2 vUv;
 
-      float Noise(vec2 n,float x){n+=x;return fract(sin(dot(n.xy,vec2(12.9898, 78.233)))*43758.5453)*2.0-1.0;}
-
-      // Step 1 in generation of the dither source texture.
-      float Step1(vec2 uv,float n){
-          float a=1.0,b=2.0,c=-12.0,t=1.0;   
-          return (1.0/(a*4.0+b*4.0-c))*(
-              Noise(uv+vec2(-1.0,-1.0)*t,n)*a+
-              Noise(uv+vec2( 0.0,-1.0)*t,n)*b+
-              Noise(uv+vec2( 1.0,-1.0)*t,n)*a+
-              Noise(uv+vec2(-1.0, 0.0)*t,n)*b+
-              Noise(uv+vec2( 0.0, 0.0)*t,n)*c+
-              Noise(uv+vec2( 1.0, 0.0)*t,n)*b+
-              Noise(uv+vec2(-1.0, 1.0)*t,n)*a+
-              Noise(uv+vec2( 0.0, 1.0)*t,n)*b+
-              Noise(uv+vec2( 1.0, 1.0)*t,n)*a+
-          0.0);
+      void main() {
+        vec4 cTextureScreen = texture2D( tDiffuse, vUv );
+        float x = vUv.x * vUv.y * time *  1000.0;
+        x = mod( x, 13.0 ) * mod( x, 123.0 );
+        float dx = mod( x, 0.01 );
+        vec3 cResult = cTextureScreen.rgb + cTextureScreen.rgb * clamp( 0.1 + dx * 100.0, 0.0, 1.0 );
+        vec2 sc = vec2( sin( vUv.y * sCount ), cos( vUv.y * sCount ) );
+        cResult += cTextureScreen.rgb * vec3( sc.x, sc.y, sc.x ) * sIntensity;
+        cResult = cTextureScreen.rgb + clamp( nIntensity, 0.0,1.0 ) * ( cResult - cTextureScreen.rgb );
+        gl_FragColor = vec4( cResult, cTextureScreen.a );
       }
-          
-      // Step 2 in generation of the dither source texture.
-      float Step2(vec2 uv,float n){
-          float a=1.0,b=2.0,c=-2.0,t=1.0;   
-          return (4.0/(a*4.0+b*4.0-c))*(
-              Step1(uv+vec2(-1.0,-1.0)*t,n)*a+
-              Step1(uv+vec2( 0.0,-1.0)*t,n)*b+
-              Step1(uv+vec2( 1.0,-1.0)*t,n)*a+
-              Step1(uv+vec2(-1.0, 0.0)*t,n)*b+
-              Step1(uv+vec2( 0.0, 0.0)*t,n)*c+
-              Step1(uv+vec2( 1.0, 0.0)*t,n)*b+
-              Step1(uv+vec2(-1.0, 1.0)*t,n)*a+
-              Step1(uv+vec2( 0.0, 1.0)*t,n)*b+
-              Step1(uv+vec2( 1.0, 1.0)*t,n)*a+
-          0.0);
-      }
-
-      vec3 Step3T(vec2 uv){
-          float a=Step2(uv,0.07*(fract(uTime)+1.0));    
-          float b=Step2(uv,0.11*(fract(uTime)+1.0));    
-          float c=Step2(uv,0.13*(fract(uTime)+1.0));
-          return mix(vec3(a,b,c), vec3(a), 1. - uSaturation);
-      }
-
-      void main() {   
-
-          color = mix(
-              color,
-              floor( 0.5 + color * (uDitherSteps+uDitherWidth-1.0) + (-uDitherWidth*0.5) + Step3T(vUv * uRez) * (uDitherWidth)) * (1.0/(uDitherSteps-1.0)),
-              uOpacity
-          );
-
-          gl_FragColor = vec4(color, 1.); 
-      } 
     `
     this.counter = 0.0;
     var myEffect = {
       uniforms: {
-        "uTime": { type: 'f', value: 0 },
-        "uRez": { type: 'f', value: window.innerHeight * window.innerWidth },
-        "uOpacity": { type: 'f', value: 1 },
-        "uDitherWidth": { type: 'f', value: window.innerWidth },
-        "uDitherSteps": { type: 'f', value: 1000 },
-        "uSaturation": { type: 'f', value: 1000 },
+        "tDiffuse": { type: "t", value: null },
+        "time": { type: "f", value: 0.0 },
+        "nIntensity": { type: "f", value: 0.1 },
+        "sIntensity": { type: "f", value: 0.05 },
+        "sCount": { type: "f", value: 4096 },
+        "grayscale": { type: "i", value: 0 },
+        "color1": { type: 'c', value: new THREE.Color('#2f0669') },
+        "color2": { type: 'c', value: new THREE.Color('#990b75') }
       },
       vertexShader: vertShader,
       fragmentShader: fragShader
@@ -173,9 +155,20 @@ class ThreeInit {
   }
 
   addFog() {
-    let fogColor = new THREE.Color(0x47264f);
+    let col
+    if(this.mobile){
+      col = 0xc81cf3
+    }
+    else{
+      col = 0xd339cb
+      col = 0x904da1
+      col = 0xc367da
+    }
+    let fogColor = new THREE.Color(col);
     this.scene.background = fogColor;
-    this.scene.fog = new THREE.Fog(fogColor, 0.0025, 30);
+    this.scene.fog = new THREE.FogExp2(fogColor, 0.05);
+    // this.scene.fog = new THREE.Fog(fogColor, 0.005, 25);
+
   }
 
   addGridHelper() {
@@ -188,9 +181,10 @@ class ThreeInit {
   }
 
   resize() {
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio)
-    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.aspect = this.container.clientWidth / this.container.clientHeight
+    this.camera.aspect = this.aspect
     this.camera.updateProjectionMatrix();
   }
 
@@ -200,9 +194,9 @@ class ThreeInit {
     }
 
     this.renderer.render(this.scene, this.camera);
-    if (this.specialGrain) {
+    if (this.specialBackground) {
       this.counter += 0.01
-      this.customPass.uniforms.uTime.value = this.counter;
+      this.customPass.uniforms.time.value = this.counter;
       this.composer.render(this.counter);
     }
   }

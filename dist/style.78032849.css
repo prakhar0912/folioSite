@@ -3,11 +3,13 @@ body{
     display: block;
     min-width: 100vw;
     height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
     margin: 0;
     padding: 0;
-    background-image: linear-gradient(90deg,#3b0785, #b439d3);
+    background-image: linear-gradient(90deg,#3b0785, #e371ff);
+    /* background-color: black; */
 }
-/* 
+
 .three{
     position: relative;
     display: block;
@@ -21,6 +23,6 @@ body{
     display: block;
     height: 100%;
     width: 100%;
-} */
+}
 
 /*# sourceMappingURL=/style.78032849.css.map */

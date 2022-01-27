@@ -38348,20 +38348,23 @@ var ThreeInit = /*#__PURE__*/function () {
   function ThreeInit(_ref) {
     var orbital = _ref.orbital,
         shadows = _ref.shadows,
-        specialGrain = _ref.specialGrain,
-        noGrain = _ref.noGrain,
+        specialBackground = _ref.specialBackground,
+        noBackground = _ref.noBackground,
         noFog = _ref.noFog,
         mobile = _ref.mobile;
 
     _classCallCheck(this, ThreeInit);
 
+    this.container = document.querySelector(".three");
     this.shadows = shadows;
     this.scene = new THREE.Scene();
-    this.specialGrain = specialGrain;
-    this.noGrain = noGrain;
+    this.specialBackground = specialBackground;
+    this.noBackground = noBackground;
     this.noFog = noFog;
     this.mobile = mobile;
-    this.camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+    this.aspect = this.container.clientWidth / this.container.clientHeight; // console.log(this.aspect)
+
+    this.camera = new THREE.PerspectiveCamera(this.mobile ? 85 : 65, this.aspect, 0.1, 1000);
     this.camera.position.x = 4.857694276842902;
     this.camera.position.y = 6.560754567944053;
     this.camera.position.z = 5.028480970069918;
@@ -38371,15 +38374,11 @@ var ThreeInit = /*#__PURE__*/function () {
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       powerPreference: 'high-performance',
-      alpha: this.mobile ? true : false
+      alpha: true
     });
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.physicallyCorrectLights = true; // this.renderer.gammaOutPut = true
-    // this.renderer.outputEncoding = THREE.sRGBEncoding
-    // this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
-    // this.renderer.shadowMap.enabled = false
-
+    this.renderer.physicallyCorrectLights = true;
     this.renderer.toneMapping = THREE.NoToneMapping;
     this.renderer.toneMappingExposure = 1;
 
@@ -38387,61 +38386,94 @@ var ThreeInit = /*#__PURE__*/function () {
       this.renderer.shadowMap.enabled = true;
     }
 
-    document.body.appendChild(this.renderer.domElement);
+    this.container.appendChild(this.renderer.domElement);
     window.addEventListener("resize", this.resize.bind(this));
 
     if (orbital) {
       this.addOrbitalCam();
     }
 
-    if (this.specialGrain) {
-      this.addGrain();
-    } else {
-      if (!this.noGrain) {
+    if (!this.noBackground) {
+      if (this.specialBackground) {
+        this.addGrain();
+        console.log('ok');
+      } else {
         this.addBackground();
+        console.log('ok');
       }
     }
 
     if (!this.noFog) {
       this.addFog();
-    }
+    } // this.addGridHelper()
+
   }
 
   _createClass(ThreeInit, [{
+    key: "addShape",
+    value: function addShape() {
+      var floorGeometry = new THREE.PlaneGeometry(20, 20);
+      var loader = new THREE.TextureLoader();
+      var basecolor = loader.load('marble/White_Marble_005_COLOR.jpg');
+      var occMap = loader.load('marble/White_Marble_005_OCC.jpg');
+      var roughnessMap = loader.load('marble/White_Marble_005_ROUGH.jpg'); // let basecolor = loader.load('marble/White_Marble_005_COLOR.jpg')
+
+      var floorMaterial = new THREE.MeshStandardMaterial({
+        map: basecolor
+      });
+      var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+      floor.position.y = 0.1;
+      floor.position.z = 0;
+      floor.rotation.x = -Math.PI / 2;
+      floor.castShadow = true;
+      floor.receiveShadow = true;
+      floor.matrixAutoUpdate = false;
+      floor.updateMatrix();
+      this.scene.add(floor);
+    }
+  }, {
     key: "addGrain",
     value: function addGrain() {
       this.composer = new _EffectComposer.EffectComposer(this.renderer);
       var renderPass = new _RenderPass.RenderPass(this.scene, this.camera);
       this.composer.addPass(renderPass); //custom shader pass
 
-      var vertShader = "\n      precision highp float; \n\n      attribute vec3 aPos;\n      attribute vec2 aUvs;\n\n      varying vec2 vUv;\n\n      void main(){\n          vUv = aUvs;\n          gl_Position = vec4(aPos, 1.0);\n      }\n    ";
-      var fragShader = "\n      precision highp float; \n\n      uniform sampler2D uTexture;\n      uniform float uTime;\n      uniform vec2 uRez;\n\n      uniform float uOpacity;\n      uniform float uDitherWidth;\n      uniform float uDitherSteps;\n      uniform float uSaturation;\n\n      varying vec2 vUv;\n\n      float Noise(vec2 n,float x){n+=x;return fract(sin(dot(n.xy,vec2(12.9898, 78.233)))*43758.5453)*2.0-1.0;}\n\n      // Step 1 in generation of the dither source texture.\n      float Step1(vec2 uv,float n){\n          float a=1.0,b=2.0,c=-12.0,t=1.0;   \n          return (1.0/(a*4.0+b*4.0-c))*(\n              Noise(uv+vec2(-1.0,-1.0)*t,n)*a+\n              Noise(uv+vec2( 0.0,-1.0)*t,n)*b+\n              Noise(uv+vec2( 1.0,-1.0)*t,n)*a+\n              Noise(uv+vec2(-1.0, 0.0)*t,n)*b+\n              Noise(uv+vec2( 0.0, 0.0)*t,n)*c+\n              Noise(uv+vec2( 1.0, 0.0)*t,n)*b+\n              Noise(uv+vec2(-1.0, 1.0)*t,n)*a+\n              Noise(uv+vec2( 0.0, 1.0)*t,n)*b+\n              Noise(uv+vec2( 1.0, 1.0)*t,n)*a+\n          0.0);\n      }\n          \n      // Step 2 in generation of the dither source texture.\n      float Step2(vec2 uv,float n){\n          float a=1.0,b=2.0,c=-2.0,t=1.0;   \n          return (4.0/(a*4.0+b*4.0-c))*(\n              Step1(uv+vec2(-1.0,-1.0)*t,n)*a+\n              Step1(uv+vec2( 0.0,-1.0)*t,n)*b+\n              Step1(uv+vec2( 1.0,-1.0)*t,n)*a+\n              Step1(uv+vec2(-1.0, 0.0)*t,n)*b+\n              Step1(uv+vec2( 0.0, 0.0)*t,n)*c+\n              Step1(uv+vec2( 1.0, 0.0)*t,n)*b+\n              Step1(uv+vec2(-1.0, 1.0)*t,n)*a+\n              Step1(uv+vec2( 0.0, 1.0)*t,n)*b+\n              Step1(uv+vec2( 1.0, 1.0)*t,n)*a+\n          0.0);\n      }\n\n      vec3 Step3T(vec2 uv){\n          float a=Step2(uv,0.07*(fract(uTime)+1.0));    \n          float b=Step2(uv,0.11*(fract(uTime)+1.0));    \n          float c=Step2(uv,0.13*(fract(uTime)+1.0));\n          return mix(vec3(a,b,c), vec3(a), 1. - uSaturation);\n      }\n\n      void main() {   \n\n          color = mix(\n              color,\n              floor( 0.5 + color * (uDitherSteps+uDitherWidth-1.0) + (-uDitherWidth*0.5) + Step3T(vUv * uRez) * (uDitherWidth)) * (1.0/(uDitherSteps-1.0)),\n              uOpacity\n          );\n\n          gl_FragColor = vec4(color, 1.); \n      } \n    ";
+      var vertShader = "\n      varying vec2 vUv;\n      void main() {\n        vUv = uv;\n        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n      }\n    ";
+      var fragShader = "\n      uniform float time;\n      uniform float nIntensity;\n      uniform float sIntensity;\n      uniform float sCount;\n      uniform sampler2D tDiffuse;\n      varying vec2 vUv;\n\n      void main() {\n        vec4 cTextureScreen = texture2D( tDiffuse, vUv );\n        float x = vUv.x * vUv.y * time *  1000.0;\n        x = mod( x, 13.0 ) * mod( x, 123.0 );\n        float dx = mod( x, 0.01 );\n        vec3 cResult = cTextureScreen.rgb + cTextureScreen.rgb * clamp( 0.1 + dx * 100.0, 0.0, 1.0 );\n        vec2 sc = vec2( sin( vUv.y * sCount ), cos( vUv.y * sCount ) );\n        cResult += cTextureScreen.rgb * vec3( sc.x, sc.y, sc.x ) * sIntensity;\n        cResult = cTextureScreen.rgb + clamp( nIntensity, 0.0,1.0 ) * ( cResult - cTextureScreen.rgb );\n        gl_FragColor = vec4( cResult, cTextureScreen.a );\n      }\n    ";
       this.counter = 0.0;
       var myEffect = {
         uniforms: {
-          "uTime": {
-            type: 'f',
+          "tDiffuse": {
+            type: "t",
+            value: null
+          },
+          "time": {
+            type: "f",
+            value: 0.0
+          },
+          "nIntensity": {
+            type: "f",
+            value: 0.1
+          },
+          "sIntensity": {
+            type: "f",
+            value: 0.05
+          },
+          "sCount": {
+            type: "f",
+            value: 4096
+          },
+          "grayscale": {
+            type: "i",
             value: 0
           },
-          "uRez": {
-            type: 'f',
-            value: window.innerHeight * window.innerWidth
+          "color1": {
+            type: 'c',
+            value: new THREE.Color('#2f0669')
           },
-          "uOpacity": {
-            type: 'f',
-            value: 1
-          },
-          "uDitherWidth": {
-            type: 'f',
-            value: window.innerWidth
-          },
-          "uDitherSteps": {
-            type: 'f',
-            value: 1000
-          },
-          "uSaturation": {
-            type: 'f',
-            value: 1000
+          "color2": {
+            type: 'c',
+            value: new THREE.Color('#990b75')
           }
         },
         vertexShader: vertShader,
@@ -38470,9 +38502,19 @@ var ThreeInit = /*#__PURE__*/function () {
   }, {
     key: "addFog",
     value: function addFog() {
-      var fogColor = new THREE.Color(0x47264f);
+      var col;
+
+      if (this.mobile) {
+        col = 0xc81cf3;
+      } else {
+        col = 0xd339cb;
+        col = 0x904da1;
+        col = 0xc367da;
+      }
+
+      var fogColor = new THREE.Color(col);
       this.scene.background = fogColor;
-      this.scene.fog = new THREE.Fog(fogColor, 0.0025, 30);
+      this.scene.fog = new THREE.FogExp2(fogColor, 0.05); // this.scene.fog = new THREE.Fog(fogColor, 0.005, 25);
     }
   }, {
     key: "addGridHelper",
@@ -38487,9 +38529,10 @@ var ThreeInit = /*#__PURE__*/function () {
   }, {
     key: "resize",
     value: function resize() {
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
       this.renderer.setPixelRatio(window.devicePixelRatio);
-      this.camera.aspect = window.innerWidth / window.innerHeight;
+      this.aspect = this.container.clientWidth / this.container.clientHeight;
+      this.camera.aspect = this.aspect;
       this.camera.updateProjectionMatrix();
     }
   }, {
@@ -38501,9 +38544,9 @@ var ThreeInit = /*#__PURE__*/function () {
 
       this.renderer.render(this.scene, this.camera);
 
-      if (this.specialGrain) {
+      if (this.specialBackground) {
         this.counter += 0.01;
-        this.customPass.uniforms.uTime.value = this.counter;
+        this.customPass.uniforms.time.value = this.counter;
         this.composer.render(this.counter);
       }
     }
@@ -42556,9 +42599,11 @@ var Objects = /*#__PURE__*/function () {
         camera = _ref.camera,
         renderer = _ref.renderer,
         shadows = _ref.shadows,
-        noFloor = _ref.noFloor,
+        mobileFloor = _ref.mobileFloor,
         noScreenShader = _ref.noScreenShader,
-        bufferGeo = _ref.bufferGeo;
+        bufferGeo = _ref.bufferGeo,
+        whiteFloor = _ref.whiteFloor,
+        mobile = _ref.mobile;
 
     _classCallCheck(this, Objects);
 
@@ -42566,52 +42611,112 @@ var Objects = /*#__PURE__*/function () {
     this.camera = camera;
     this.renderer = renderer;
     this.shadows = shadows;
-    this.noFloor = noFloor;
+    this.mobileFloor = mobileFloor;
     this.bufferGeo = bufferGeo;
     this.noScreenShader = noScreenShader;
-
-    if (this.shadows) {
-      this.addLights();
-    }
-
+    this.whiteFloor = whiteFloor;
+    this.mobile = mobile;
     this.addFloor();
     this.addScreenSegment();
-    this.loadModels(); // this.addDiffLight()
-    // this.addLights()
+    this.loadModels();
+    this.addDiffLight();
   }
 
   _createClass(Objects, [{
     key: "addDiffLight",
     value: function addDiffLight() {
-      var pointLight = new THREE.PointLight(0xffffff, 10, 1000);
-      pointLight.position.set(-4, 1, -2);
-      this.scene.add(pointLight);
-      var sphereSize = 1;
-      var pointLightHelper = new THREE.PointLightHelper(pointLight, sphereSize);
-      this.scene.add(pointLightHelper);
+      var pointLight;
+
+      if (this.whiteFloor) {
+        if (this.shadows) {
+          pointLight = new THREE.PointLight(0xffffff, 18, 12);
+          pointLight.position.set(-4, 4, -2);
+          pointLight.shadow.radius = 1.2;
+          pointLight.castShadow = false;
+          this.scene.add(pointLight);
+          var shadowLight = new THREE.PointLight(0xffffff, 2, 10);
+          shadowLight.position.set(-4, 4, -2);
+          shadowLight.shadow.radius = 1.2;
+          shadowLight.castShadow = true;
+          this.scene.add(shadowLight);
+        } else {
+          pointLight = new THREE.PointLight(0xffffff, 20, 10);
+          pointLight.position.set(-4, 4, -2);
+          pointLight.castShadow = false;
+          this.scene.add(pointLight);
+        }
+
+        this.mainLight = pointLight;
+      } else {// pointLight = new THREE.PointLight(0xffffff, 10, 1000);
+        // pointLight.position.set(-4, 8, -2);
+        // pointLight.shadow.radius = 1.2
+        // this.scene.add(pointLight);
+        // this.mainLight = pointLight
+      } // const sphereSize = 0.1;
+      // const pointLightHelper = new THREE.PointLightHelper(pointLight, sphereSize);
+      // this.scene.add(pointLightHelper);
+
     }
   }, {
     key: "addLights",
     value: function addLights() {
-      var directionalLight = new THREE.DirectionalLight(0xffffff, 0.3);
+      var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
       directionalLight.position.x = -4;
-      directionalLight.position.y = 5;
+      directionalLight.position.y = 2;
       directionalLight.position.z = -2;
+      var targetObject = new THREE.Object3D();
+      targetObject.position.set(-4, 10, -2);
+      this.scene.add(targetObject);
+      directionalLight.target = targetObject; // directionalLight.target = this.masterMesh
+
       directionalLight.castShadow = true;
       directionalLight.shadow.radius = 1.2;
+      var helper = new THREE.DirectionalLightHelper(directionalLight, 5);
+      this.scene.add(helper);
       this.scene.add(directionalLight);
+    }
+  }, {
+    key: "addWall",
+    value: function addWall() {
+      var floorGeometry;
+
+      if (!this.bufferGeo) {
+        floorGeometry = new THREE.PlaneGeometry(100, 100);
+      } else {
+        floorGeometry = new THREE.PlaneBufferGeometry(100, 100);
+      }
+
+      var material = new THREE.ShaderMaterial({
+        uniforms: {
+          color1: {
+            value: new THREE.Color("#2f0669")
+          },
+          color2: {
+            value: new THREE.Color("#990b75")
+          }
+        },
+        vertexShader: "\n              varying vec2 vUv;\n          \n              void main() {\n                vUv = uv;\n                gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);\n              }\n            ",
+        fragmentShader: "\n              uniform vec3 color1;\n              uniform vec3 color2;\n            \n              varying vec2 vUv;\n              \n              void main() {\n                \n                gl_FragColor = vec4(mix(color1, color2, vUv.x), 1.0);\n              }\n            "
+      });
+      var floor = new THREE.Mesh(floorGeometry, material); // floor.position.y = -0;
+
+      floor.position.z = -20; // floor.rotation.x = -Math.PI / 2;
+
+      floor.castShadow = false;
+      floor.receiveShadow = false;
+      this.scene.add(floor);
     }
   }, {
     key: "addFloor",
     value: function addFloor() {
-      if (!this.noFloor) {
+      if (!this.mobileFloor) {
         if (!this.shadows) {
           var geometry;
 
           if (this.bufferGeo) {
             geometry = new THREE.PlaneBufferGeometry(20, 20);
           } else {
-            geometry = new THREE.PlaneGeometry(20, 20);
+            geometry = new THREE.PlaneGeometry(100, 100);
           }
 
           var mirror = new _Reflector.Reflector(geometry, {
@@ -42631,14 +42736,23 @@ var Objects = /*#__PURE__*/function () {
           var floorGeometry;
 
           if (!this.bufferGeo) {
-            floorGeometry = new THREE.PlaneGeometry(20, 20);
+            floorGeometry = new THREE.PlaneGeometry(100, 100);
           } else {
-            floorGeometry = new THREE.PlaneBufferGeometry(20, 20);
+            floorGeometry = new THREE.PlaneBufferGeometry(100, 100);
           }
 
-          var floorMaterial = new THREE.ShadowMaterial({
-            transparent: true,
-            opacity: 0.3
+          var col;
+
+          if (this.whiteFloor) {
+            col = 0xffffff;
+          } else {
+            col = 0x443f4b;
+          }
+
+          var floorMaterial = new THREE.MeshPhongMaterial({
+            color: new THREE.Color(col),
+            shininess: this.whiteFloor ? 10 : 100,
+            reflectivity: this.whiteFloor ? 1 : 1
           });
           var floor = new THREE.Mesh(floorGeometry, floorMaterial);
           floor.position.y = -0;
@@ -42651,7 +42765,7 @@ var Objects = /*#__PURE__*/function () {
           var _geometry;
 
           if (!this.bufferGeo) {
-            _geometry = new THREE.RingGeometry(1, 4, 122); // const geometry = new THREE.PlaneGeometry(20, 20);
+            _geometry = new THREE.RingGeometry(1, 4, 122);
           } else {
             _geometry = new THREE.RingBufferGeometry(1, 4, 122);
           }
@@ -42662,38 +42776,113 @@ var Objects = /*#__PURE__*/function () {
             textureHeight: 1024 * window.devicePixelRatio,
             color: 0x889999
           });
-          console.log('okayy'); // let mirror = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({transparent: true, opacity: 0}))
-
           mirror.position.x = -4;
           mirror.position.y = 0.01;
           mirror.position.z = -2;
-          mirror.rotation.x = -Math.PI / 2; // mirror.castShadow = false;
-
+          mirror.rotation.x = -Math.PI / 2;
           mirror.receiveShadow = true;
           this.scene.add(mirror);
         }
-      } else {// const floorGeometry = new THREE.PlaneGeometry(20, 20);
-        // let texture = new THREE.TextureLoader().load('img/marble.jpg')
+      } else {
+        var _floorGeometry;
+
+        if (!this.bufferGeo) {
+          _floorGeometry = new THREE.PlaneGeometry(100, 100);
+        } else {
+          _floorGeometry = new THREE.PlaneBufferGeometry(100, 100);
+        }
+
+        var _floorMaterial = new THREE.MeshBasicMaterial({
+          color: new THREE.Color(0x000000)
+        });
+
+        var _floor = new THREE.Mesh(_floorGeometry, _floorMaterial);
+
+        _floor.position.y = -0;
+        _floor.position.z = 0;
+        _floor.rotation.x = -Math.PI / 2;
+        _floor.castShadow = true;
+        _floor.receiveShadow = true;
+        this.scene.add(_floor);
+
+        var _geometry2;
+
+        if (!this.bufferGeo) {
+          _geometry2 = new THREE.RingGeometry(0, 4 * 0.7, 122);
+        } else {
+          _geometry2 = new THREE.RingBufferGeometry(0, 4 * 0.7, 122);
+        }
+
+        var _col;
+
+        if (this.whiteFloor) {
+          _col = 0xffffff;
+        } else {
+          _col = 0x443f4b;
+        }
+
+        _col = 0xffffff;
+        var ringMaterial = new THREE.MeshBasicMaterial({
+          color: new THREE.Color(_col)
+        });
+
+        var _mirror = new THREE.Mesh(_geometry2, ringMaterial);
+
+        _mirror.position.x = -4;
+        _mirror.position.y = 0.01;
+        _mirror.position.z = -2;
+        _mirror.rotation.x = -Math.PI / 2;
+        _mirror.receiveShadow = true; // this.scene.add(mirror)
+        // let floorGeometry
+        // if (!this.bufferGeo) {
+        //     floorGeometry = new THREE.PlaneGeometry(60, 60);
+        // }
+        // else {
+        //     floorGeometry = new THREE.PlaneBufferGeometry(60, 60);
+        // }
+        // let col
+        // if (this.whiteFloor) {
+        //     col = 0xffffff
+        // }
+        // else {
+        //     col = 0x141414
+        // }
         // let floorMaterial = new THREE.MeshBasicMaterial({
-        //     map: texture,
-        //     color: new THREE.Color(0xfff)
-        // });
-        // console.log('here')
+        //     color: new THREE.Color(col),
+        // })
+        // // let floorMaterial = new THREE.MeshPhongMaterial({
+        // //     color: new THREE.Color(col),
+        // //     reflectivity: this.whiteFloor ? 1 : 1,
+        // // });
         // let floor = new THREE.Mesh(floorGeometry, floorMaterial)
-        // floor.position.y = -0;
-        // floor.position.z = 0;
+        // floor.position.x = -4;
+        // floor.position.y = 0.0;
+        // floor.position.z = -2;
         // floor.rotation.x = -Math.PI / 2;
-        // floor.castShadow = true;
-        // floor.receiveShadow = true
+        // floor.castShadow = false;
+        // floor.receiveShadow = false
         // this.scene.add(floor)
       }
     }
   }, {
     key: "addScreenSegment",
     value: function addScreenSegment() {
-      var outerRadius = 2.998;
-      var innerRadius = 2.9;
-      var height = 2.05;
+      var outerRadius;
+      var innerRadius;
+      var height; // if (this.mobile) {
+      //     outerRadius = 1.99;
+      //     innerRadius = 1.9;
+      //     height = 0.55;
+      // }
+      // else {
+      //     outerRadius = 2.99;
+      //     innerRadius = 2.9;
+      //     height = 2.05;
+      // }
+
+      outerRadius = 2.99;
+      innerRadius = 2.9;
+      height = 2.05;
       this.masterMesh = new THREE.Group();
       this.masterMesh.position.x = -4;
       this.masterMesh.position.y = 1.0;
@@ -42770,22 +42959,28 @@ var Objects = /*#__PURE__*/function () {
       mesh = new THREE.Mesh(geometry, material);
       mesh.position.y = -0.95;
       this.masterMesh.add(mesh);
-      this.createScreenSection(0);
-      this.createScreenSection(1);
-      this.createScreenSection(2);
-      this.createScreenSection(3);
+      this.createScreenSection(0, Math.ceil(outerRadius));
+      this.createScreenSection(1, Math.ceil(outerRadius));
+      this.createScreenSection(2, Math.ceil(outerRadius));
+      this.createScreenSection(3, Math.ceil(outerRadius));
+
+      if (this.mobile) {
+        this.masterMesh.scale.set(0.6, 0.6, 0.6);
+        this.masterMesh.position.y -= 0.4;
+      }
+
       this.scene.add(this.masterMesh);
     }
   }, {
     key: "createScreenSection",
-    value: function createScreenSection(videoNum) {
+    value: function createScreenSection(videoNum, outerRadius) {
       var offset = 0.005;
       var geometry;
 
       if (!this.bufferGeo) {
-        geometry = new THREE.CylinderGeometry(3, 3, 2, 32, 32, true, videoNum * (Math.PI / 2), Math.PI / 2 - offset);
+        geometry = new THREE.CylinderGeometry(outerRadius, outerRadius, 2, 32, 32, true, videoNum * (Math.PI / 2), Math.PI / 2 - offset);
       } else {
-        geometry = new THREE.CylinderBufferGeometry(3, 3, 2, 32, 32, true, videoNum * (Math.PI / 2), Math.PI / 2 - offset);
+        geometry = new THREE.CylinderBufferGeometry(outerRadius, outerRadius, 2, 32, 32, true, videoNum * (Math.PI / 2), Math.PI / 2 - offset);
       }
 
       var video = document.querySelector("#video".concat(videoNum + 1));
@@ -42802,9 +42997,9 @@ var Objects = /*#__PURE__*/function () {
       this.masterMesh.add(mesh);
 
       if (!this.bufferGeo) {
-        geometry = new THREE.CylinderGeometry(3, 3, 2, 32, 32, true, (videoNum + 1) * Math.PI / 2 - offset, offset);
+        geometry = new THREE.CylinderGeometry(outerRadius, outerRadius, 2, 32, 32, true, (videoNum + 1) * Math.PI / 2 - offset, offset);
       } else {
-        geometry = new THREE.CylinderBufferGeometry(3, 3, 2, 32, 32, true, (videoNum + 1) * Math.PI / 2 - offset, offset);
+        geometry = new THREE.CylinderBufferGeometry(outerRadius, outerRadius, 2, 32, 32, true, (videoNum + 1) * Math.PI / 2 - offset, offset);
       }
 
       material = new THREE.MeshBasicMaterial({
@@ -42885,7 +43080,11 @@ var Objects = /*#__PURE__*/function () {
         model.castShadow = false;
       }
 
-      model.scale.set(0.3, 0.3, 0.3);
+      if (this.mobile) {
+        model.scale.set(0.21, 0.21, 0.21);
+      } else {
+        model.scale.set(0.3, 0.3, 0.3);
+      }
 
       if (i == 0) {
         model.rotation.y = 3 * Math.PI / 4;
@@ -42917,7 +43116,17 @@ var Objects = /*#__PURE__*/function () {
         }
       }
 
-      model.position.set(this.position[j][i][0], this.position[j][i][1], this.position[j][i][2]);
+      if (this.mobile) {
+        if (i == 1 || i == 2) {
+          model.position.set(0.7 * (this.position[j][i][0] - 2), this.position[j][i][1] * 1, 0.6 * (this.position[j][i][2] - 1.8));
+        } else if (i == 3) {
+          model.position.set(0.9 * (this.position[j][i][0] - 2), this.position[j][i][1] * 1, 0.7 * (this.position[j][i][2] - 1));
+        } else {
+          model.position.set(0.7 * (this.position[j][i][0] - 2), this.position[j][i][1] * 1, 0.7 * (this.position[j][i][2] - 2));
+        }
+      } else {
+        model.position.set(this.position[j][i][0], this.position[j][i][1], this.position[j][i][2]);
+      }
     }
   }]);
 
@@ -48587,10 +48796,17 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 var Anime = /*#__PURE__*/function () {
   function Anime(_ref) {
+    var _this = this;
+
     var scene = _ref.scene,
         renderer = _ref.renderer,
         camera = _ref.camera,
-        screen = _ref.screen;
+        screen = _ref.screen,
+        mobile = _ref.mobile,
+        orbital = _ref.orbital,
+        stickToCenterAnime = _ref.stickToCenterAnime,
+        snappingAnime = _ref.snappingAnime,
+        mainLight = _ref.mainLight;
 
     _classCallCheck(this, Anime);
 
@@ -48598,6 +48814,11 @@ var Anime = /*#__PURE__*/function () {
     this.scene = scene;
     this.renderer = renderer;
     this.camera = camera;
+    this.mobile = mobile;
+    this.orbital = orbital;
+    this.stickToCenterAnime = stickToCenterAnime;
+    this.snappingAnime = snappingAnime;
+    this.mainLight = mainLight;
     this.stopAnime = false;
     this.offset = new THREE.Vector2();
     this.positionOffset = new THREE.Vector3();
@@ -48610,11 +48831,21 @@ var Anime = /*#__PURE__*/function () {
     this.time = 0.001;
     this.randomRotNum = 0;
     this.screenPos = [Math.PI / 2.3 + 0 * (Math.PI / 2), Math.PI / 2.3 + 1 * (Math.PI / 2), Math.PI / 2.3 + 2 * (Math.PI / 2), Math.PI / 2.3 + 3 * (Math.PI / 2)];
-    this.snapOffset = 0.5;
+    this.snapOffset = this.stickToCenterAnime ? 0.7 : 0.5;
     this.snapTo = 1;
     this.snapToAnime = null;
-    this.cameraShake();
+
+    if (!this.mobile) {
+      this.cameraShake();
+    }
+
     this.rotInf();
+
+    if (!this.orbital) {
+      setTimeout(function () {
+        _this.goToProjects();
+      }, 3000);
+    }
   }
 
   _createClass(Anime, [{
@@ -48652,10 +48883,14 @@ var Anime = /*#__PURE__*/function () {
       var scrollPos = this.screen.rotation.y > 0 ? this.screen.rotation.y : (2 * Math.PI - Math.abs(this.screen.rotation.y)) % (2 * Math.PI);
 
       for (var i = 0; i < 4; i++) {
-        if (this.dir) {
-          dist = this.absDist(scrollPos, this.screenPos[i] - Math.PI / 4);
+        if (this.stickToCenterAnime) {
+          dist = this.absDist(scrollPos, this.screenPos[i]);
         } else {
-          dist = this.absDist(scrollPos, this.screenPos[i] + Math.PI / 4);
+          if (this.dir) {
+            dist = this.absDist(scrollPos, this.screenPos[i] - Math.PI / 4);
+          } else {
+            dist = this.absDist(scrollPos, this.screenPos[i] + Math.PI / 4);
+          }
         }
 
         if (dist < leastDist) {
@@ -48665,69 +48900,82 @@ var Anime = /*#__PURE__*/function () {
       }
 
       if (leastDist < this.snapOffset) {
-        if (this.snapToAnime) {
-          this.snapToAnime.kill();
-        }
-
+        // if (this.snapToAnime) {
+        //     this.snapToAnime.kill()
+        // }
+        // if (this.moveScreenAnime.isActive()) {
+        //     this.snapToAnime.kill()
+        // }
         this.decideClosestSnapTo(scrollPos);
       }
     }
   }, {
     key: "decideClosestSnapTo",
     value: function decideClosestSnapTo(scrollPos) {
+      var dist = this.absDist(scrollPos, this.screenPos[this.snapTo]);
+
       if (this.dir) {
         this.snapToAnime = _gsap.default.to(this.screen.rotation, {
-          y: this.screen.rotation.y + this.absDist(scrollPos, this.screenPos[this.snapTo]),
-          duration: 1.5,
-          ease: "linear"
+          y: this.screen.rotation.y + dist,
+          duration: 0.8
         });
       } else {
         this.snapToAnime = _gsap.default.to(this.screen.rotation, {
-          y: this.screen.rotation.y - this.absDist(scrollPos, this.screenPos[this.snapTo]),
-          duration: 1.5,
-          ease: "linear"
+          y: this.screen.rotation.y - dist,
+          duration: 0.8
         });
       }
     }
   }, {
     key: "rotInf",
     value: function rotInf() {
-      var _this = this;
+      var _this2 = this;
 
       this.randomRotation = setInterval(function () {
-        if (_this.randomRotAnime) {
-          _this.randomRotAnime.kill();
+        if (_this2.randomRotAnime) {
+          _this2.randomRotAnime.kill();
         }
 
-        _this.randomRotAnime = _gsap.default.to(_this.screen.rotation, {
-          y: Math.PI / 2.3 + _this.randomRotNum * (Math.PI / 2),
+        _this2.randomRotAnime = _gsap.default.to(_this2.screen.rotation, {
+          y: Math.PI / 2.3 + _this2.randomRotNum * (Math.PI / 2),
           duration: 2.5,
           ease: "power4.out"
         });
-        _this.randomRotNum++;
+        _this2.randomRotNum++;
       }, 5000);
     }
   }, {
     key: "stopRotInf",
     value: function stopRotInf() {
       clearInterval(this.randomRotation);
-    }
+    } // addDragListeners() {
+    //     this.rotStart = this.rotateStart.bind(this)
+    //     this.rotMov = this.rotateMove.bind(this)
+    //     this.rotUp = this.rotateUp.bind(this)
+    //     document.addEventListener('mousedown', this.rotStart)
+    //     document.addEventListener('mousemove', this.rotMov)
+    //     document.addEventListener('mouseup', this.rotUp)
+    // }
+
   }, {
-    key: "addDragListeners",
-    value: function addDragListeners() {
+    key: "addWheelListeners",
+    value: function addWheelListeners() {
+      // this.rotMov = this.wheelMove.bind(this)
+      // this.mouseDown = true
+      // document.addEventListener('wheel', this.rotMov)
       this.rotStart = this.rotateStart.bind(this);
       this.rotMov = this.rotateMove.bind(this);
       this.rotUp = this.rotateUp.bind(this);
-      document.addEventListener('mousedown', this.rotStart);
-      document.addEventListener('mousemove', this.rotMov);
-      document.addEventListener('mouseup', this.rotUp);
+      document.addEventListener(this.mobile ? 'touchstart' : 'mousedown', this.rotStart);
+      document.addEventListener(this.mobile ? 'touchmove' : 'mousemove', this.rotMov);
+      document.addEventListener(this.mobile ? 'touchend' : 'mouseup', this.rotUp);
     }
   }, {
     key: "removeDragListeners",
     value: function removeDragListeners() {
-      document.removeEventListener('mousedown', this.rotStart);
-      document.removeEventListener('mousemove', this.rotMov);
-      document.removeEventListener('mouseup', this.rotUp);
+      document.removeEventListener(this.mobile ? 'touchstart' : 'mousedown', this.rotStart);
+      document.removeEventListener(this.mobile ? 'touchmove' : 'mousemove', this.rotMov);
+      document.removeEventListener(this.mobile ? 'touchend' : 'mouseup', this.rotUp);
     }
   }, {
     key: "rotateMove",
@@ -48736,22 +48984,48 @@ var Anime = /*#__PURE__*/function () {
         return;
       }
 
-      evt.preventDefault();
-      this.deltaX = evt.clientX - this.mouseX;
-      this.deltaY = evt.clientY - this.mouseY;
-      this.mouseX = evt.clientX;
-      this.mouseY = evt.clientY;
-      this.rotateScreen(this.deltaX, this.deltaY);
+      if (!this.mobile) {
+        evt.preventDefault();
+      }
+
+      if (this.snappingAnime) {
+        if (this.snapToAnime.isActive()) {
+          this.snapToAnime.kill();
+        }
+      }
+
+      if (this.mobile) {
+        this.deltaX = evt.touches[0].screenX - this.mouseX;
+        this.deltaY = evt.touches[0].screenY - this.mouseY;
+        this.mouseX = evt.touches[0].screenX;
+        this.mouseY = evt.touches[0].screenY;
+        this.rotateScreen(this.deltaX);
+      } else {
+        this.deltaX = evt.clientX - this.mouseX;
+        this.deltaY = evt.clientY - this.mouseY;
+        this.mouseX = evt.clientX;
+        this.mouseY = evt.clientY;
+        this.rotateScreen(this.deltaX);
+      }
     }
   }, {
     key: "rotateScreen",
-    value: function rotateScreen(dx, dy) {
+    value: function rotateScreen(dx) {
       this.dx = dx;
     }
   }, {
     key: "rotateStart",
     value: function rotateStart(evt) {
-      evt.preventDefault();
+      if (!this.mobile) {
+        evt.preventDefault();
+      }
+
+      if (this.snappingAnime) {
+        if (this.snapToAnime.isActive()) {
+          this.snapToAnime.kill();
+        }
+      }
+
       this.mouseDown = true;
       this.mouseX = evt.clientX;
       this.mouseY = evt.clientY;
@@ -48759,11 +49033,16 @@ var Anime = /*#__PURE__*/function () {
   }, {
     key: "rotateUp",
     value: function rotateUp(evt) {
-      evt.preventDefault();
-      this.mouseDown = false;
+      if (!this.mobile) {
+        evt.preventDefault();
+      }
 
-      if (this.shakeAnime) {
-        this.shakeAnime.kill();
+      this.mouseDown = false; // if (this.shakeAnime) {
+      //     this.shakeAnime.kill()
+      // }
+
+      if (this.snappingAnime) {
+        this.snapToScreen();
       } // this.shakeAnime = gsap.to(this.camera.rotation, { z: 0, duration: 3 })
       // this.snapToScreen()
 
@@ -48771,12 +49050,17 @@ var Anime = /*#__PURE__*/function () {
   }, {
     key: "goToProjects",
     value: function goToProjects() {
-      var _this2 = this;
+      var _this3 = this;
 
       this.stopAnime = true;
       this.section = 'projects';
       this.stopRotInf();
       var timer = 1;
+
+      _gsap.default.to(this.mainLight, {
+        intensity: 0,
+        duration: timer * 2
+      });
 
       _gsap.default.to(this.camera.rotation, {
         z: -0.4,
@@ -48790,14 +49074,14 @@ var Anime = /*#__PURE__*/function () {
       });
 
       _gsap.default.to(this.camera.position, {
-        z: 3,
-        y: 0.7,
+        z: this.mobile ? 0.9 : 2.5,
+        y: this.mobile ? 0.45 : 0.7,
         x: -1,
         duration: 2 * timer
       });
 
       _gsap.default.to(this.camera.rotation, {
-        y: 0.55,
+        y: this.mobile ? 0.9 : 0.55,
         duration: timer,
         delay: 2 * timer - 0.5
       });
@@ -48810,15 +49094,27 @@ var Anime = /*#__PURE__*/function () {
 
       this.offset.x = 0.027933;
       this.offset.y = 0.635915;
-      this.offset.z = 0;
+      this.offset.z = 0; // setTimeout(() => {
+      //     if(this.mobile){
+      //         return
+      //     }
+      //     this.scene.background.lerpColors(new THREE.Color(0xc367da), new THREE.Color(0xe371ff), 1)
+      // }, 1800 * timer)
+
       setTimeout(function () {
-        _this2.offset.x = 0;
-        _this2.offset.y = 0.55;
+        _this3.offset.x = 0;
+        _this3.offset.y = _this3.mobile ? 0.9 : 0.55;
 
-        _this2.addDragListeners();
+        _this3.addWheelListeners(); // this.mainLight.intensity = 2
+        // this.addDragListeners()
 
-        _this2.stopAnime = false;
       }, 3000 * timer);
+    }
+  }, {
+    key: "wheelMove",
+    value: function wheelMove(e) {
+      var dx = e.deltaY;
+      this.dx = dx;
     }
   }, {
     key: "cameraShake",
@@ -48883,8 +49179,15 @@ var Anime = /*#__PURE__*/function () {
   }, {
     key: "moveScreen",
     value: function moveScreen() {
+      // if (this.dx == 0) {
+      //     return
+      // }
       this.timeDelta = this.time - this.oldTime;
-      this.speed = this.dx / this.timeDelta / 7000;
+      this.speed = this.dx / this.timeDelta * 5;
+
+      if (this.mobile) {
+        this.speed *= 4;
+      }
 
       if (isNaN(this.speed)) {
         return;
@@ -48909,7 +49212,7 @@ var Anime = /*#__PURE__*/function () {
       //     this.shakeAnime = gsap.to(this.camera.rotation, { z: 0, duration: 3 })
       // }
 
-      _gsap.default.to(this.screen.rotation, {
+      this.moveScreenAnime = _gsap.default.to(this.screen.rotation, {
         y: this.screen.rotation.y + this.pi,
         duration: 0.8
       });
@@ -48917,21 +49220,10 @@ var Anime = /*#__PURE__*/function () {
       if (Math.abs(this.screen.rotation.y) > 2 * Math.PI) {
         this.screen.rotation.y = this.screen.rotation.y % (2 * Math.PI);
       }
-
-      this.snapToScreen();
     }
   }, {
-    key: "animate",
-    value: function animate() {
-      if (this.stopAnime) {
-        return;
-      }
-
-      if (this.mouseDown) {
-        this.moveScreen();
-      }
-
-      this.time = this.oldTime;
+    key: "mouseCameraMovement",
+    value: function mouseCameraMovement() {
       this.target.x = (1 - this.mouse.x) * 0.00009;
       this.target.y = (1 - this.mouse.y) * 0.00009;
       this.final.x += 0.05 * (this.target.y - this.final.x);
@@ -48940,11 +49232,24 @@ var Anime = /*#__PURE__*/function () {
       _gsap.default.to(this.camera.rotation, {
         x: this.final.x + this.offset.x,
         y: this.final.y + this.offset.y,
-        duration: 0.001
+        duration: 0.002
       });
+    }
+  }, {
+    key: "animate",
+    value: function animate() {
+      this.time = Date.now();
 
+      if (!this.stopAnime && !this.mobile) {
+        this.mouseCameraMovement();
+      }
+
+      if (this.mouseDown) {
+        this.moveScreen();
+      }
+
+      this.oldTime = this.time;
       this.dx = 0;
-      this.time += 0.001;
     }
   }]);
 
@@ -49091,31 +49396,60 @@ var _stats = _interopRequireDefault(require("three/examples/jsm/libs/stats.modul
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var mobile = false;
+var mobileAndTabletCheck = function mobileAndTabletCheck() {
+  var check = false;
+
+  (function (a) {
+    if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0, 4))) check = true;
+  })(navigator.userAgent || navigator.vendor || window.opera);
+
+  return check;
+};
+
+var mobileDevice = mobileAndTabletCheck();
+
+if (mobileDevice) {
+  var nice = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', "".concat(nice, "px"));
+  window.addEventListener("resize", function () {
+    nice = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', "".concat(nice, "px"));
+  }, false);
+}
+
+var mobile = mobileDevice;
 var orbital = false;
 var shadows = true;
-var noFloor = false;
-var noScreenShader = true;
-var specialGrain = false;
-var noGrain = false;
+var mobileFloor = false;
+var whiteFloor = true;
+var noScreenShader = false;
+var noBackground = true;
+var specialBackground = false;
 var noFog = false;
 var bufferGeo = false; //for mobile not for laptop
 
+var snappingAnime = true;
+var stickToCenterAnime = false; //Might need to add a max speed for snappingAnime
+
 if (mobile) {
-  orbital = true;
+  orbital = false;
   shadows = false;
-  noFloor = true;
-  noGrain = true;
-  noFog = true;
+  whiteFloor = true;
+  mobileFloor = true;
+  noBackground = true;
+  noFog = false;
   bufferGeo = true;
+  noScreenShader = true;
+  snappingAnime = false;
+  stickToCenterAnime = false;
 }
 
 var threeInstance = new _ThreeInit.ThreeInit({
   orbital: orbital,
   shadows: shadows,
-  specialGrain: specialGrain,
+  specialBackground: specialBackground,
   mobile: mobile,
-  noGrain: noGrain,
+  noBackground: noBackground,
   noFog: noFog,
   bufferGeo: bufferGeo
 });
@@ -49124,18 +49458,22 @@ var objects = new _Objects.Objects({
   camera: threeInstance.camera,
   renderer: threeInstance.renderer,
   shadows: shadows,
-  specialGrain: specialGrain,
-  noFloor: noFloor,
+  mobileFloor: mobileFloor,
   noScreenShader: noScreenShader,
-  bufferGeo: bufferGeo
+  bufferGeo: bufferGeo,
+  whiteFloor: whiteFloor,
+  mobile: mobile
 });
 var animes = new _Anime.Anime({
   screen: objects.masterMesh,
   scene: threeInstance.scene,
   camera: threeInstance.camera,
   renderer: threeInstance.renderer,
-  specialGrain: specialGrain,
-  mobile: mobile
+  mainLight: objects.mainLight,
+  mobile: mobile,
+  orbital: orbital,
+  stickToCenterAnime: stickToCenterAnime,
+  snappingAnime: snappingAnime
 });
 var stats = (0, _stats.default)();
 document.body.appendChild(stats.domElement);
@@ -49180,7 +49518,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "45371" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "37227" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
