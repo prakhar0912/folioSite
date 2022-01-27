@@ -27,7 +27,7 @@ if (mobileDevice) {
 let mobile = mobileDevice
 
 
-let orbital = false
+let orbital = true
 let shadows = true
 let noFloor = false
 let mobileFloor = false

@@ -49423,7 +49423,7 @@ if (mobileDevice) {
 }
 
 var mobile = mobileDevice;
-var orbital = false;
+var orbital = true;
 var shadows = true;
 var noFloor = false;
 var mobileFloor = false;
