@@ -239,7 +239,7 @@ class Anime {
         gsap.to(this.camera.rotation, { z: -0.4, duration: timer })
         gsap.to(this.camera.rotation, { z: 0, duration: timer, delay: timer })
         gsap.to(this.camera.position, { z: this.mobile ? 0.9 : 2.5, y: this.mobile ? 0.45 : 0.7, x: -1, duration: 2 * timer })
-        gsap.to(this.camera.rotation, { y: this.mobile ? 0.9 : 0.55, duration: timer, delay: (2 * timer) - 0.5 })
+        gsap.to(this.camera.rotation, { y: this.mobile ? 0.8 : 0.55, duration: timer, delay: (2 * timer) - 0.5 })
         gsap.to(this.camera.rotation, { x: 0, duration: timer, delay: (2 * timer) - 0.5 })
         this.offset.x = 0.027933
         this.offset.y = 0.635915
@@ -252,7 +252,7 @@ class Anime {
         // }, 1800 * timer)
         setTimeout(() => {
             this.offset.x = 0
-            this.offset.y = this.mobile ? 0.9 : 0.55
+            this.offset.y = this.mobile ? 0.8 : 0.55
             this.addWheelListeners()
             // this.mainLight.intensity = 2
             // this.addDragListeners()

@@ -38362,8 +38362,7 @@ var ThreeInit = /*#__PURE__*/function () {
     this.noBackground = noBackground;
     this.noFog = noFog;
     this.mobile = mobile;
-    this.aspect = this.container.clientWidth / this.container.clientHeight; // console.log(this.aspect)
-
+    this.aspect = this.container.clientWidth / this.container.clientHeight;
     this.camera = new THREE.PerspectiveCamera(this.mobile ? 85 : 65, this.aspect, 0.1, 1000);
     this.camera.position.x = 4.857694276842902;
     this.camera.position.y = 6.560754567944053;
@@ -42601,6 +42600,7 @@ var Objects = /*#__PURE__*/function () {
         shadows = _ref.shadows,
         mobileFloor = _ref.mobileFloor,
         noScreenShader = _ref.noScreenShader,
+        noFloor = _ref.noFloor,
         bufferGeo = _ref.bufferGeo,
         whiteFloor = _ref.whiteFloor,
         mobile = _ref.mobile;
@@ -42615,6 +42615,7 @@ var Objects = /*#__PURE__*/function () {
     this.bufferGeo = bufferGeo;
     this.noScreenShader = noScreenShader;
     this.whiteFloor = whiteFloor;
+    this.noFloor = noFloor;
     this.mobile = mobile;
     this.addFloor();
     this.addScreenSegment();
@@ -42709,6 +42710,10 @@ var Objects = /*#__PURE__*/function () {
   }, {
     key: "addFloor",
     value: function addFloor() {
+      if (this.noFloor) {
+        return;
+      }
+
       if (!this.mobileFloor) {
         if (!this.shadows) {
           var geometry;
@@ -49081,7 +49086,7 @@ var Anime = /*#__PURE__*/function () {
       });
 
       _gsap.default.to(this.camera.rotation, {
-        y: this.mobile ? 0.9 : 0.55,
+        y: this.mobile ? 0.8 : 0.55,
         duration: timer,
         delay: 2 * timer - 0.5
       });
@@ -49103,7 +49108,7 @@ var Anime = /*#__PURE__*/function () {
 
       setTimeout(function () {
         _this3.offset.x = 0;
-        _this3.offset.y = _this3.mobile ? 0.9 : 0.55;
+        _this3.offset.y = _this3.mobile ? 0.8 : 0.55;
 
         _this3.addWheelListeners(); // this.mainLight.intensity = 2
         // this.addDragListeners()
@@ -49420,6 +49425,7 @@ if (mobileDevice) {
 var mobile = mobileDevice;
 var orbital = false;
 var shadows = true;
+var noFloor = false;
 var mobileFloor = false;
 var whiteFloor = true;
 var noScreenShader = false;
@@ -49434,11 +49440,12 @@ var stickToCenterAnime = false; //Might need to add a max speed for snappingAnim
 if (mobile) {
   orbital = false;
   shadows = false;
+  noFloor = true;
   whiteFloor = true;
   mobileFloor = true;
   noBackground = true;
-  noFog = false;
-  bufferGeo = true;
+  noFog = true;
+  bufferGeo = false;
   noScreenShader = true;
   snappingAnime = false;
   stickToCenterAnime = false;
@@ -49458,6 +49465,7 @@ var objects = new _Objects.Objects({
   camera: threeInstance.camera,
   renderer: threeInstance.renderer,
   shadows: shadows,
+  noFloor: noFloor,
   mobileFloor: mobileFloor,
   noScreenShader: noScreenShader,
   bufferGeo: bufferGeo,

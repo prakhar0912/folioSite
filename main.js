@@ -29,6 +29,7 @@ let mobile = mobileDevice
 
 let orbital = false
 let shadows = true
+let noFloor = false
 let mobileFloor = false
 let whiteFloor = true
 let noScreenShader = false
@@ -45,11 +46,12 @@ let stickToCenterAnime = false
 if (mobile) {
     orbital = false
     shadows = false
+    noFloor = true
     whiteFloor = true
     mobileFloor = true
     noBackground = true
-    noFog = false
-    bufferGeo = true
+    noFog = true
+    bufferGeo = false
     noScreenShader = true
     snappingAnime = false
     stickToCenterAnime = false
@@ -70,6 +72,7 @@ const objects = new Objects({
     camera: threeInstance.camera,
     renderer: threeInstance.renderer,
     shadows: shadows,
+    noFloor,
     mobileFloor,
     noScreenShader,
     bufferGeo,

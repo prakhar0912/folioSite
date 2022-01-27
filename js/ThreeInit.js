@@ -15,7 +15,6 @@ class ThreeInit {
     this.noFog = noFog
     this.mobile = mobile
     this.aspect = this.container.clientWidth / this.container.clientHeight
-    // console.log(this.aspect)
     this.camera = new THREE.PerspectiveCamera(this.mobile ? 85 : 65, this.aspect, 0.1, 1000);
 
     this.camera.position.x = 4.857694276842902

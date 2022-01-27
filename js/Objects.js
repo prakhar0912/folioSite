@@ -17,7 +17,7 @@ class Objects {
         scene,
         camera,
         renderer,
-        shadows, mobileFloor, noScreenShader, bufferGeo, whiteFloor, mobile
+        shadows, mobileFloor, noScreenShader, noFloor, bufferGeo, whiteFloor, mobile
     }) {
         this.scene = scene
         this.camera = camera
@@ -27,6 +27,7 @@ class Objects {
         this.bufferGeo = bufferGeo
         this.noScreenShader = noScreenShader
         this.whiteFloor = whiteFloor
+        this.noFloor = noFloor
         this.mobile = mobile
         this.addFloor()
         this.addScreenSegment()
@@ -141,6 +142,9 @@ class Objects {
     }
 
     addFloor() {
+        if(this.noFloor){
+            return
+        }
         if (!this.mobileFloor) {
             if (!this.shadows) {
                 let geometry
