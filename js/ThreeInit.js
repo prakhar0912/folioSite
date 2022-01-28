@@ -29,7 +29,7 @@ class ThreeInit {
       powerPreference: 'high-performance',
       alpha: true
     });
-    this.mobilePixelRatio = 1
+    this.mobilePixelRatio = 1.3
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight)
     this.renderer.setPixelRatio(this.mobile ? this.mobilePixelRatio : window.devicePixelRatio);
     this.renderer.physicallyCorrectLights = true
