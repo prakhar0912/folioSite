@@ -38375,8 +38375,9 @@ var ThreeInit = /*#__PURE__*/function () {
       powerPreference: 'high-performance',
       alpha: true
     });
+    this.mobilePixelRatio = 1;
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setPixelRatio(this.mobile ? this.mobilePixelRatio : window.devicePixelRatio);
     this.renderer.physicallyCorrectLights = true;
     this.renderer.toneMapping = THREE.NoToneMapping;
     this.renderer.toneMappingExposure = 1;
@@ -38529,7 +38530,7 @@ var ThreeInit = /*#__PURE__*/function () {
     key: "resize",
     value: function resize() {
       this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
-      this.renderer.setPixelRatio(window.devicePixelRatio);
+      this.renderer.setPixelRatio(this.mobile ? this.mobilePixelRatio : window.devicePixelRatio);
       this.aspect = this.container.clientWidth / this.container.clientHeight;
       this.camera.aspect = this.aspect;
       this.camera.updateProjectionMatrix();
