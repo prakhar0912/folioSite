@@ -21,7 +21,7 @@ class ThreeInit {
     this.camera.position.z = 5.028480970069918
 
     this.camera.rotation.x = -0.6132813005274419
-    this.camera.rotation.y = 0.3006405553572554
+    this.camera.rotation.y = this.mobile ? 0.5 : 0.3006405553572554
     this.camera.rotation.z = 0.20548036184093635
 
     this.renderer = new THREE.WebGLRenderer({
@@ -32,9 +32,12 @@ class ThreeInit {
     this.mobilePixelRatio = 1.3
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight)
     this.renderer.setPixelRatio(this.mobile ? this.mobilePixelRatio : window.devicePixelRatio);
+
     this.renderer.physicallyCorrectLights = true
     this.renderer.toneMapping = THREE.NoToneMapping
     this.renderer.toneMappingExposure = 1
+
+
     if (this.shadows) {
       this.renderer.shadowMap.enabled = true;
     }
@@ -54,7 +57,7 @@ class ThreeInit {
 
       }
     }
-    
+
     if (!this.noFog) {
       this.addFog()
     }
@@ -155,19 +158,17 @@ class ThreeInit {
 
   addFog() {
     let col
-    if(this.mobile){
+    if (this.mobile) {
       col = 0xc81cf3
     }
-    else{
+    else {
       col = 0xd339cb
-      col = 0x904da1
-      col = 0xc367da
+      col = 0xc81cf3
     }
     let fogColor = new THREE.Color(col);
     this.scene.background = fogColor;
     this.scene.fog = new THREE.FogExp2(fogColor, 0.05);
     // this.scene.fog = new THREE.Fog(fogColor, 0.005, 25);
-
   }
 
   addGridHelper() {

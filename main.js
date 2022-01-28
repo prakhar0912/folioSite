@@ -46,11 +46,11 @@ let stickToCenterAnime = false
 if (mobile) {
     orbital = false
     shadows = false
-    noFloor = true
+    noFloor = false
     whiteFloor = true
     mobileFloor = true
     noBackground = true
-    noFog = true
+    noFog = false
     bufferGeo = false
     noScreenShader = true
     snappingAnime = false
@@ -90,7 +90,8 @@ const animes = new Anime({
     orbital,
     stickToCenterAnime,
     snappingAnime,
-    videoMaterials: objects.videoMaterial
+    videoMaterials: objects.videoMaterial,
+    mobileFloorMesh: objects.mobileFloorMesh
 })
 
 const stats = Stats()

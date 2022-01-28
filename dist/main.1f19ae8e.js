@@ -38368,7 +38368,7 @@ var ThreeInit = /*#__PURE__*/function () {
     this.camera.position.y = 6.560754567944053;
     this.camera.position.z = 5.028480970069918;
     this.camera.rotation.x = -0.6132813005274419;
-    this.camera.rotation.y = 0.3006405553572554;
+    this.camera.rotation.y = this.mobile ? 0.5 : 0.3006405553572554;
     this.camera.rotation.z = 0.20548036184093635;
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -38508,8 +38508,7 @@ var ThreeInit = /*#__PURE__*/function () {
         col = 0xc81cf3;
       } else {
         col = 0xd339cb;
-        col = 0x904da1;
-        col = 0xc367da;
+        col = 0xc81cf3;
       }
 
       var fogColor = new THREE.Color(col);
@@ -42642,18 +42641,18 @@ var Objects = /*#__PURE__*/function () {
           shadowLight.castShadow = true;
           this.scene.add(shadowLight);
         } else {
-          pointLight = new THREE.PointLight(0xffffff, 20, 10);
+          pointLight = new THREE.PointLight(0xffffff, 18, 8);
           pointLight.position.set(-4, 4, -2);
           pointLight.castShadow = false;
           this.scene.add(pointLight);
         }
 
         this.mainLight = pointLight;
-      } else {// pointLight = new THREE.PointLight(0xffffff, 10, 1000);
-        // pointLight.position.set(-4, 8, -2);
-        // pointLight.shadow.radius = 1.2
-        // this.scene.add(pointLight);
-        // this.mainLight = pointLight
+      } else {
+        pointLight = new THREE.PointLight(0xffffff, 20, 10);
+        pointLight.position.set(-4, 4, -2);
+        this.scene.add(pointLight);
+        this.mainLight = pointLight;
       } // const sphereSize = 0.1;
       // const pointLightHelper = new THREE.PointLightHelper(pointLight, sphereSize);
       // this.scene.add(pointLightHelper);
@@ -42761,8 +42760,9 @@ var Objects = /*#__PURE__*/function () {
             reflectivity: this.whiteFloor ? 1 : 1
           });
           var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+          floor.position.x = -4;
           floor.position.y = -0;
-          floor.position.z = 0;
+          floor.position.z = -2;
           floor.rotation.x = -Math.PI / 2;
           floor.castShadow = true;
           floor.receiveShadow = true;
@@ -42790,33 +42790,54 @@ var Objects = /*#__PURE__*/function () {
           this.scene.add(mirror);
         }
       } else {
+        // let floorGeometry
+        // if (!this.bufferGeo) {
+        //     floorGeometry = new THREE.PlaneGeometry(100, 100);
+        // }
+        // else {
+        //     floorGeometry = new THREE.PlaneBufferGeometry(100, 100);
+        // }
+        // let floorMaterial = new THREE.MeshBasicMaterial({
+        //     color: new THREE.Color(0x000000),
+        // })
+        // let floor = new THREE.Mesh(floorGeometry, floorMaterial)
+        // floor.position.y = -0;
+        // floor.position.z = 0;
+        // floor.rotation.x = -Math.PI / 2;
+        // floor.castShadow = true;
+        // floor.receiveShadow = true
+        // this.scene.add(floor)
+        // let geometry
+        // if (!this.bufferGeo) {
+        //     geometry = new THREE.RingGeometry(0, 4 * 0.7, 122);
+        // }
+        // else {
+        //     geometry = new THREE.RingBufferGeometry(0, 4 * 0.7, 122);
+        // }
+        // let col
+        // if (this.whiteFloor) {
+        //     col = 0xffffff
+        // }
+        // else {
+        //     col = 0x443f4b
+        // }
+        // col = 0xffffff
+        // let ringMaterial = new THREE.MeshBasicMaterial({
+        //     color: new THREE.Color(col),
+        // })
+        // let mirror = new THREE.Mesh(geometry, ringMaterial)
+        // mirror.position.x = -4;
+        // mirror.position.y = 0.01;
+        // mirror.position.z = -2;
+        // mirror.rotation.x = -Math.PI / 2;
+        // mirror.receiveShadow = true
+        // this.scene.add(mirror)
         var _floorGeometry;
 
         if (!this.bufferGeo) {
-          _floorGeometry = new THREE.PlaneGeometry(100, 100);
+          _floorGeometry = new THREE.PlaneGeometry(60, 60);
         } else {
-          _floorGeometry = new THREE.PlaneBufferGeometry(100, 100);
-        }
-
-        var _floorMaterial = new THREE.MeshBasicMaterial({
-          color: new THREE.Color(0x000000)
-        });
-
-        var _floor = new THREE.Mesh(_floorGeometry, _floorMaterial);
-
-        _floor.position.y = -0;
-        _floor.position.z = 0;
-        _floor.rotation.x = -Math.PI / 2;
-        _floor.castShadow = true;
-        _floor.receiveShadow = true;
-        this.scene.add(_floor);
-
-        var _geometry2;
-
-        if (!this.bufferGeo) {
-          _geometry2 = new THREE.RingGeometry(0, 4 * 0.7, 122);
-        } else {
-          _geometry2 = new THREE.RingBufferGeometry(0, 4 * 0.7, 122);
+          _floorGeometry = new THREE.PlaneBufferGeometry(60, 60);
         }
 
         var _col;
@@ -42824,50 +42845,28 @@ var Objects = /*#__PURE__*/function () {
         if (this.whiteFloor) {
           _col = 0xffffff;
         } else {
-          _col = 0x443f4b;
-        }
-
-        _col = 0xffffff;
-        var ringMaterial = new THREE.MeshBasicMaterial({
-          color: new THREE.Color(_col)
-        });
-
-        var _mirror = new THREE.Mesh(_geometry2, ringMaterial);
-
-        _mirror.position.x = -4;
-        _mirror.position.y = 0.01;
-        _mirror.position.z = -2;
-        _mirror.rotation.x = -Math.PI / 2;
-        _mirror.receiveShadow = true; // this.scene.add(mirror)
-        // let floorGeometry
-        // if (!this.bufferGeo) {
-        //     floorGeometry = new THREE.PlaneGeometry(60, 60);
-        // }
-        // else {
-        //     floorGeometry = new THREE.PlaneBufferGeometry(60, 60);
-        // }
-        // let col
-        // if (this.whiteFloor) {
-        //     col = 0xffffff
-        // }
-        // else {
-        //     col = 0x141414
-        // }
-        // let floorMaterial = new THREE.MeshBasicMaterial({
+          _col = 0x141414;
+        } // let floorMaterial = new THREE.MeshBasicMaterial({
         //     color: new THREE.Color(col),
         // })
-        // // let floorMaterial = new THREE.MeshPhongMaterial({
-        // //     color: new THREE.Color(col),
-        // //     reflectivity: this.whiteFloor ? 1 : 1,
-        // // });
-        // let floor = new THREE.Mesh(floorGeometry, floorMaterial)
-        // floor.position.x = -4;
-        // floor.position.y = 0.0;
-        // floor.position.z = -2;
-        // floor.rotation.x = -Math.PI / 2;
-        // floor.castShadow = false;
-        // floor.receiveShadow = false
-        // this.scene.add(floor)
+
+
+        var _floorMaterial = new THREE.MeshPhongMaterial({
+          color: new THREE.Color(_col),
+          reflectivity: this.whiteFloor ? 1 : 1,
+          shininess: this.whiteFloor ? 10 : 100
+        });
+
+        var _floor = new THREE.Mesh(_floorGeometry, _floorMaterial);
+
+        _floor.position.x = -4;
+        _floor.position.y = 0.0;
+        _floor.position.z = -2;
+        _floor.rotation.x = -Math.PI / 2;
+        _floor.castShadow = false;
+        _floor.receiveShadow = false;
+        this.mobileFloorMesh = _floor;
+        this.scene.add(_floor);
       }
     }
   }, {
@@ -48813,7 +48812,8 @@ var Anime = /*#__PURE__*/function () {
         stickToCenterAnime = _ref.stickToCenterAnime,
         snappingAnime = _ref.snappingAnime,
         mainLight = _ref.mainLight,
-        videoMaterials = _ref.videoMaterials;
+        videoMaterials = _ref.videoMaterials,
+        mobileFloorMesh = _ref.mobileFloorMesh;
 
     _classCallCheck(this, Anime);
 
@@ -48826,6 +48826,7 @@ var Anime = /*#__PURE__*/function () {
     this.stickToCenterAnime = stickToCenterAnime;
     this.snappingAnime = snappingAnime;
     this.mainLight = mainLight;
+    this.mobileFloorMesh = mobileFloorMesh;
     this.stopAnime = false;
     this.offset = new THREE.Vector2();
     this.positionOffset = new THREE.Vector3();
@@ -49066,7 +49067,7 @@ var Anime = /*#__PURE__*/function () {
       var timer = 1;
 
       _gsap.default.to(this.mainLight, {
-        intensity: 0,
+        intensity: 3,
         duration: timer * 2
       });
 
@@ -49102,25 +49103,28 @@ var Anime = /*#__PURE__*/function () {
 
       this.offset.x = 0.027933;
       this.offset.y = 0.635915;
-      this.offset.z = 0; // setTimeout(() => {
-      //     if(this.mobile){
-      //         return
-      //     }
-      //     this.scene.background.lerpColors(new THREE.Color(0xc367da), new THREE.Color(0xe371ff), 1)
-      // }, 1800 * timer)
-
+      this.offset.z = 0;
       setTimeout(function () {
-        _this3.videoMaterials.forEach(function (el) {
-          el.side = THREE.FrontSide;
-        });
+        _this3.onProjectsOptimizations();
 
         _this3.offset.x = 0;
         _this3.offset.y = _this3.mobile ? 0.8 : 0.55;
 
-        _this3.addWheelListeners(); // this.mainLight.intensity = 2
-        // this.addDragListeners()
-
+        _this3.addWheelListeners();
       }, 3000 * timer);
+    }
+  }, {
+    key: "onProjectsOptimizations",
+    value: function onProjectsOptimizations() {
+      this.videoMaterials.forEach(function (el) {
+        el.side = THREE.FrontSide;
+      });
+
+      if (this.mobile) {
+        this.mobileFloorMesh.material = new THREE.MeshBasicMaterial({
+          color: new THREE.Color(0x141414)
+        });
+      }
     }
   }, {
     key: "wheelMove",
@@ -49447,11 +49451,11 @@ var stickToCenterAnime = false; //Might need to add a max speed for snappingAnim
 if (mobile) {
   orbital = false;
   shadows = false;
-  noFloor = true;
+  noFloor = false;
   whiteFloor = true;
   mobileFloor = true;
   noBackground = true;
-  noFog = true;
+  noFog = false;
   bufferGeo = false;
   noScreenShader = true;
   snappingAnime = false;
@@ -49489,7 +49493,8 @@ var animes = new _Anime.Anime({
   orbital: orbital,
   stickToCenterAnime: stickToCenterAnime,
   snappingAnime: snappingAnime,
-  videoMaterials: objects.videoMaterial
+  videoMaterials: objects.videoMaterial,
+  mobileFloorMesh: objects.mobileFloorMesh
 });
 var stats = (0, _stats.default)();
 document.body.appendChild(stats.domElement);

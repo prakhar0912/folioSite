@@ -53,7 +53,7 @@ class Objects {
                 this.scene.add(shadowLight)
             }
             else {
-                pointLight = new THREE.PointLight(0xffffff, 20, 10);
+                pointLight = new THREE.PointLight(0xffffff, 18, 8);
                 pointLight.position.set(-4, 4, -2);
                 pointLight.castShadow = false
                 this.scene.add(pointLight)
@@ -61,11 +61,10 @@ class Objects {
             this.mainLight = pointLight
         }
         else {
-            // pointLight = new THREE.PointLight(0xffffff, 10, 1000);
-            // pointLight.position.set(-4, 8, -2);
-            // pointLight.shadow.radius = 1.2
-            // this.scene.add(pointLight);
-            // this.mainLight = pointLight
+            pointLight = new THREE.PointLight(0xffffff, 20, 10);
+            pointLight.position.set(-4, 4, -2);
+            this.scene.add(pointLight);
+            this.mainLight = pointLight
         }
 
         // const sphereSize = 0.1;
@@ -142,7 +141,7 @@ class Objects {
     }
 
     addFloor() {
-        if(this.noFloor){
+        if (this.noFloor) {
             return
         }
         if (!this.mobileFloor) {
@@ -196,12 +195,15 @@ class Objects {
                 });
 
                 let floor = new THREE.Mesh(floorGeometry, floorMaterial)
+                floor.position.x = -4
                 floor.position.y = -0;
-                floor.position.z = 0;
+                floor.position.z = -2;
                 floor.rotation.x = -Math.PI / 2;
                 floor.castShadow = true;
                 floor.receiveShadow = true
                 this.scene.add(floor)
+
+
 
 
 
@@ -229,67 +231,35 @@ class Objects {
         }
         else {
 
-            let floorGeometry
-
-            if (!this.bufferGeo) {
-                floorGeometry = new THREE.PlaneGeometry(100, 100);
-            }
-            else {
-                floorGeometry = new THREE.PlaneBufferGeometry(100, 100);
-            }
-
-            let floorMaterial = new THREE.MeshBasicMaterial({
-                color: new THREE.Color(0x000000),
-            })
-
-            let floor = new THREE.Mesh(floorGeometry, floorMaterial)
-            floor.position.y = -0;
-            floor.position.z = 0;
-            floor.rotation.x = -Math.PI / 2;
-            floor.castShadow = true;
-            floor.receiveShadow = true
-            this.scene.add(floor)
-
-
-
-            let geometry
-            if (!this.bufferGeo) {
-                geometry = new THREE.RingGeometry(0, 4 * 0.7, 122);
-            }
-            else {
-                geometry = new THREE.RingBufferGeometry(0, 4 * 0.7, 122);
-            }
-
-            let col
-            if (this.whiteFloor) {
-                col = 0xffffff
-            }
-            else {
-                col = 0x443f4b
-            }
-            col = 0xffffff
-
-            let ringMaterial = new THREE.MeshBasicMaterial({
-                color: new THREE.Color(col),
-            })
-
-            let mirror = new THREE.Mesh(geometry, ringMaterial)
-            mirror.position.x = -4;
-            mirror.position.y = 0.01;
-            mirror.position.z = -2;
-            mirror.rotation.x = -Math.PI / 2;
-            mirror.receiveShadow = true
-            // this.scene.add(mirror)
-
-
-
             // let floorGeometry
 
             // if (!this.bufferGeo) {
-            //     floorGeometry = new THREE.PlaneGeometry(60, 60);
+            //     floorGeometry = new THREE.PlaneGeometry(100, 100);
             // }
             // else {
-            //     floorGeometry = new THREE.PlaneBufferGeometry(60, 60);
+            //     floorGeometry = new THREE.PlaneBufferGeometry(100, 100);
+            // }
+
+            // let floorMaterial = new THREE.MeshBasicMaterial({
+            //     color: new THREE.Color(0x000000),
+            // })
+
+            // let floor = new THREE.Mesh(floorGeometry, floorMaterial)
+            // floor.position.y = -0;
+            // floor.position.z = 0;
+            // floor.rotation.x = -Math.PI / 2;
+            // floor.castShadow = true;
+            // floor.receiveShadow = true
+            // this.scene.add(floor)
+
+
+
+            // let geometry
+            // if (!this.bufferGeo) {
+            //     geometry = new THREE.RingGeometry(0, 4 * 0.7, 122);
+            // }
+            // else {
+            //     geometry = new THREE.RingBufferGeometry(0, 4 * 0.7, 122);
             // }
 
             // let col
@@ -297,26 +267,60 @@ class Objects {
             //     col = 0xffffff
             // }
             // else {
-            //     col = 0x141414
+            //     col = 0x443f4b
             // }
+            // col = 0xffffff
+
+            // let ringMaterial = new THREE.MeshBasicMaterial({
+            //     color: new THREE.Color(col),
+            // })
+
+            // let mirror = new THREE.Mesh(geometry, ringMaterial)
+            // mirror.position.x = -4;
+            // mirror.position.y = 0.01;
+            // mirror.position.z = -2;
+            // mirror.rotation.x = -Math.PI / 2;
+            // mirror.receiveShadow = true
+            // this.scene.add(mirror)
+
+
+
+            let floorGeometry
+
+            if (!this.bufferGeo) {
+                floorGeometry = new THREE.PlaneGeometry(60, 60);
+            }
+            else {
+                floorGeometry = new THREE.PlaneBufferGeometry(60, 60);
+            }
+
+            let col
+            if (this.whiteFloor) {
+                col = 0xffffff
+            }
+            else {
+                col = 0x141414
+            }
 
             // let floorMaterial = new THREE.MeshBasicMaterial({
             //     color: new THREE.Color(col),
             // })
 
-            // // let floorMaterial = new THREE.MeshPhongMaterial({
-            // //     color: new THREE.Color(col),
-            // //     reflectivity: this.whiteFloor ? 1 : 1,
-            // // });
+            let floorMaterial = new THREE.MeshPhongMaterial({
+                color: new THREE.Color(col),
+                reflectivity: this.whiteFloor ? 1 : 1,
+                shininess: this.whiteFloor ? 10 : 100,
+            });
 
-            // let floor = new THREE.Mesh(floorGeometry, floorMaterial)
-            // floor.position.x = -4;
-            // floor.position.y = 0.0;
-            // floor.position.z = -2;
-            // floor.rotation.x = -Math.PI / 2;
-            // floor.castShadow = false;
-            // floor.receiveShadow = false
-            // this.scene.add(floor)
+            let floor = new THREE.Mesh(floorGeometry, floorMaterial)
+            floor.position.x = -4;
+            floor.position.y = 0.0;
+            floor.position.z = -2;
+            floor.rotation.x = -Math.PI / 2;
+            floor.castShadow = false;
+            floor.receiveShadow = false
+            this.mobileFloorMesh = floor
+            this.scene.add(floor)
         }
     }
 
@@ -557,7 +561,7 @@ class Objects {
             if (i == 1 || i == 2) {
                 model.position.set(0.7 * (this.position[j][i][0] - 2), this.position[j][i][1] * 1, 0.6 * (this.position[j][i][2] - 1.8))
             }
-            else if(i == 3){
+            else if (i == 3) {
                 model.position.set(0.9 * (this.position[j][i][0] - 2), this.position[j][i][1] * 1, 0.7 * (this.position[j][i][2] - 1))
             }
             else {

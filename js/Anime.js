@@ -4,7 +4,9 @@ import gsap from "gsap";
 
 class Anime {
     constructor({ scene, renderer, camera, screen,
-        mobile, orbital, stickToCenterAnime, snappingAnime, mainLight, videoMaterials
+        mobile, orbital, stickToCenterAnime,
+        snappingAnime, mainLight, videoMaterials,
+        mobileFloorMesh
     }) {
         this.screen = screen
         this.scene = scene
@@ -15,6 +17,7 @@ class Anime {
         this.stickToCenterAnime = stickToCenterAnime
         this.snappingAnime = snappingAnime
         this.mainLight = mainLight
+        this.mobileFloorMesh = mobileFloorMesh
         this.stopAnime = false
         this.offset = new THREE.Vector2()
         this.positionOffset = new THREE.Vector3()
@@ -237,7 +240,7 @@ class Anime {
         this.section = 'projects'
         this.stopRotInf()
         let timer = 1
-        gsap.to(this.mainLight, { intensity: 0, duration: timer * 2 })
+        gsap.to(this.mainLight, { intensity: 3, duration: timer * 2 })
         gsap.to(this.camera.rotation, { z: -0.4, duration: timer })
         gsap.to(this.camera.rotation, { z: 0, duration: timer, delay: timer })
         gsap.to(this.camera.position, { z: this.mobile ? 0.9 : 2.5, y: this.mobile ? 0.45 : 0.7, x: -1, duration: 2 * timer })
@@ -246,22 +249,23 @@ class Anime {
         this.offset.x = 0.027933
         this.offset.y = 0.635915
         this.offset.z = 0
-        // setTimeout(() => {
-        //     if(this.mobile){
-        //         return
-        //     }
-        //     this.scene.background.lerpColors(new THREE.Color(0xc367da), new THREE.Color(0xe371ff), 1)
-        // }, 1800 * timer)
         setTimeout(() => {
-            this.videoMaterials.forEach(el => {
-                el.side = THREE.FrontSide
-            })
+            this.onProjectsOptimizations()
             this.offset.x = 0
             this.offset.y = this.mobile ? 0.8 : 0.55
             this.addWheelListeners()
-            // this.mainLight.intensity = 2
-            // this.addDragListeners()
         }, 3000 * timer)
+    }
+
+    onProjectsOptimizations(){
+        this.videoMaterials.forEach(el => {
+            el.side = THREE.FrontSide
+        })
+        if(this.mobile){
+            this.mobileFloorMesh.material = new THREE.MeshBasicMaterial({
+                color: new THREE.Color(0x141414),
+            })
+        }
     }
 
 
