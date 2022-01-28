@@ -4,7 +4,7 @@ import gsap from "gsap";
 
 class Anime {
     constructor({ scene, renderer, camera, screen,
-        mobile, orbital, stickToCenterAnime, snappingAnime, mainLight
+        mobile, orbital, stickToCenterAnime, snappingAnime, mainLight, videoMaterials
     }) {
         this.screen = screen
         this.scene = scene
@@ -35,11 +35,13 @@ class Anime {
         this.snapOffset = this.stickToCenterAnime ? 0.7 : 0.5
         this.snapTo = 1
         this.snapToAnime = null
+        this.videoMaterials = videoMaterials
         if (!this.mobile) {
             this.cameraShake()
         }
         this.rotInf()
 
+        
         if (!this.orbital) {
             setTimeout(() => {
                 this.goToProjects()
@@ -251,6 +253,9 @@ class Anime {
         //     this.scene.background.lerpColors(new THREE.Color(0xc367da), new THREE.Color(0xe371ff), 1)
         // }, 1800 * timer)
         setTimeout(() => {
+            this.videoMaterials.forEach(el => {
+                el.side = THREE.FrontSide
+            })
             this.offset.x = 0
             this.offset.y = this.mobile ? 0.8 : 0.55
             this.addWheelListeners()

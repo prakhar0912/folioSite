@@ -42944,8 +42944,7 @@ var Objects = /*#__PURE__*/function () {
       }
 
       var material = new THREE.MeshBasicMaterial({
-        color: 0x000,
-        side: THREE.DoubleSide
+        color: 0x000
       });
       var mesh = new THREE.Mesh(geometry, material);
       mesh.position.y = 1.05;
@@ -42958,12 +42957,12 @@ var Objects = /*#__PURE__*/function () {
       }
 
       material = new THREE.MeshBasicMaterial({
-        color: 0x000,
-        side: THREE.DoubleSide
+        color: 0x000
       });
       mesh = new THREE.Mesh(geometry, material);
       mesh.position.y = -0.95;
       this.masterMesh.add(mesh);
+      this.videoMaterial = [];
       this.createScreenSection(0, Math.ceil(outerRadius));
       this.createScreenSection(1, Math.ceil(outerRadius));
       this.createScreenSection(2, Math.ceil(outerRadius));
@@ -42999,6 +42998,7 @@ var Objects = /*#__PURE__*/function () {
       });
       var mesh = new THREE.Mesh(geometry, material);
       mesh.position.y = 0.05;
+      this.videoMaterial.push(material);
       this.masterMesh.add(mesh);
 
       if (!this.bufferGeo) {
@@ -43008,8 +43008,7 @@ var Objects = /*#__PURE__*/function () {
       }
 
       material = new THREE.MeshBasicMaterial({
-        color: 0x000000,
-        side: THREE.DoubleSide
+        color: 0x000000
       });
       mesh = new THREE.Mesh(geometry, material);
       mesh.position.y = 0.05;
@@ -43066,7 +43065,8 @@ var Objects = /*#__PURE__*/function () {
 
       if (j == 4) {
         return;
-      }
+      } // model.matrixAutoUpdate = false
+
 
       this.scene.add(model);
       model.children.forEach(function (el, i) {
@@ -48811,7 +48811,8 @@ var Anime = /*#__PURE__*/function () {
         orbital = _ref.orbital,
         stickToCenterAnime = _ref.stickToCenterAnime,
         snappingAnime = _ref.snappingAnime,
-        mainLight = _ref.mainLight;
+        mainLight = _ref.mainLight,
+        videoMaterials = _ref.videoMaterials;
 
     _classCallCheck(this, Anime);
 
@@ -48839,6 +48840,7 @@ var Anime = /*#__PURE__*/function () {
     this.snapOffset = this.stickToCenterAnime ? 0.7 : 0.5;
     this.snapTo = 1;
     this.snapToAnime = null;
+    this.videoMaterials = videoMaterials;
 
     if (!this.mobile) {
       this.cameraShake();
@@ -49107,6 +49109,10 @@ var Anime = /*#__PURE__*/function () {
       // }, 1800 * timer)
 
       setTimeout(function () {
+        _this3.videoMaterials.forEach(function (el) {
+          el.side = THREE.FrontSide;
+        });
+
         _this3.offset.x = 0;
         _this3.offset.y = _this3.mobile ? 0.8 : 0.55;
 
@@ -49481,7 +49487,8 @@ var animes = new _Anime.Anime({
   mobile: mobile,
   orbital: orbital,
   stickToCenterAnime: stickToCenterAnime,
-  snappingAnime: snappingAnime
+  snappingAnime: snappingAnime,
+  videoMaterials: objects.videoMaterial
 });
 var stats = (0, _stats.default)();
 document.body.appendChild(stats.domElement);
@@ -49526,7 +49533,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "37227" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "37191" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

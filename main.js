@@ -89,7 +89,8 @@ const animes = new Anime({
     mobile,
     orbital,
     stickToCenterAnime,
-    snappingAnime
+    snappingAnime,
+    videoMaterials: objects.videoMaterial
 })
 
 const stats = Stats()

@@ -391,7 +391,7 @@ class Objects {
             geometry = new THREE.CylinderBufferGeometry(outerRadius, outerRadius, 0.05, 102, 32, true)
         }
 
-        let material = new THREE.MeshBasicMaterial({ color: 0x000, side: THREE.DoubleSide });
+        let material = new THREE.MeshBasicMaterial({ color: 0x000 });
         let mesh = new THREE.Mesh(geometry, material);
         mesh.position.y = 1.05
         this.masterMesh.add(mesh)
@@ -402,10 +402,12 @@ class Objects {
         else {
             geometry = new THREE.CylinderBufferGeometry(outerRadius, outerRadius, 0.05, 102, 32, true)
         }
-        material = new THREE.MeshBasicMaterial({ color: 0x000, side: THREE.DoubleSide });
+        material = new THREE.MeshBasicMaterial({ color: 0x000 });
         mesh = new THREE.Mesh(geometry, material);
         mesh.position.y = -0.95
         this.masterMesh.add(mesh)
+
+        this.videoMaterial = []
 
         this.createScreenSection(0, Math.ceil(outerRadius))
         this.createScreenSection(1, Math.ceil(outerRadius))
@@ -437,6 +439,7 @@ class Objects {
         let material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
         let mesh = new THREE.Mesh(geometry, material);
         mesh.position.y = 0.05
+        this.videoMaterial.push(material)
         this.masterMesh.add(mesh)
 
         if (!this.bufferGeo) {
@@ -445,7 +448,7 @@ class Objects {
         else {
             geometry = new THREE.CylinderBufferGeometry(outerRadius, outerRadius, 2, 32, 32, true, ((videoNum + 1) * Math.PI / 2) - offset, offset)
         }
-        material = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
+        material = new THREE.MeshBasicMaterial({ color: 0x000000 });
         mesh = new THREE.Mesh(geometry, material);
         mesh.position.y = 0.05
         this.masterMesh.add(mesh)
@@ -498,6 +501,7 @@ class Objects {
         if (j == 4) {
             return
         }
+        // model.matrixAutoUpdate = false
         this.scene.add(model)
         model.children.forEach((el, i) => {
             if (this.shadows) {
