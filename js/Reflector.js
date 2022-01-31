@@ -89,6 +89,7 @@ class Reflector extends Mesh{
         material.uniforms.tDiffuse.value = renderTarget.texture;
         material.uniforms.tDepth.value = renderTarget.depthTexture;
         material.uniforms.color.value = color;
+        material.uniforms.depthMulti.value = 100000
         material.uniforms.textureMatrix.value = textureMatrix;
     
         this.material = material;
@@ -263,6 +264,11 @@ Reflector.ReflectorShader = {
             value: 0
         },
 
+        'depthMulti': {
+            type: 'f',
+            value: 100000
+        }
+
     },
 
     vertexShader: [
@@ -285,6 +291,7 @@ Reflector.ReflectorShader = {
         'uniform sampler2D tDepth;',
         'uniform float cameraNear;',
         'uniform float cameraFar;',
+        'uniform float depthMulti;',
         'varying vec4 vUv;',
 
         'float blendOverlay( float base, float blend ) {',
@@ -311,7 +318,7 @@ Reflector.ReflectorShader = {
 
         '   vec4 base = texture2DProj( tDiffuse, vUv );',
         ' float depth = readDepth( tDepth, vUv );',
-        '   gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 - ( depth * 100000.0 ) );',
+        '   gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 - ( depth * depthMulti ) );',
 
         '}'
     ].join( '\n' )

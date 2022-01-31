@@ -16,13 +16,16 @@ class ThreeInit {
     this.mobile = mobile
     this.aspect = this.container.clientWidth / this.container.clientHeight
     this.camera = new THREE.PerspectiveCamera(this.mobile ? 85 : 65, this.aspect, 0.1, 1000);
-    this.camera.position.x = 4.857694276842902
-    this.camera.position.y = 6.560754567944053
-    this.camera.position.z = 5.028480970069918
+    this.camera.position.x = 1.857694276842902
+    this.camera.position.y = 4.960754567944053
+    this.camera.position.z = 3.728480970069918
 
     this.camera.rotation.x = -0.6132813005274419
     this.camera.rotation.y = this.mobile ? 0.5 : 0.3006405553572554
-    this.camera.rotation.z = 0.20548036184093635
+    this.camera.rotation.z = 0.25548036184093635
+    
+
+    // this.camera.lookAt(new THREE.Vector3(2,0,-2))
 
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -49,11 +52,9 @@ class ThreeInit {
     if (!this.noBackground) {
       if (this.specialBackground) {
         this.addGrain()
-        console.log('ok')
       }
       else {
         this.addBackground()
-        console.log('ok')
 
       }
     }
@@ -64,33 +65,6 @@ class ThreeInit {
     // this.addGridHelper()
   }
 
-  addShape() {
-    let floorGeometry = new THREE.PlaneGeometry(20, 20);
-
-
-    let loader = new THREE.TextureLoader()
-    let basecolor = loader.load('marble/White_Marble_005_COLOR.jpg')
-    let occMap = loader.load('marble/White_Marble_005_OCC.jpg')
-    let roughnessMap = loader.load('marble/White_Marble_005_ROUGH.jpg')
-    // let basecolor = loader.load('marble/White_Marble_005_COLOR.jpg')
-
-
-
-
-    let floorMaterial = new THREE.MeshStandardMaterial({
-      map: basecolor,
-    });
-
-    let floor = new THREE.Mesh(floorGeometry, floorMaterial)
-    floor.position.y = 0.1;
-    floor.position.z = 0;
-    floor.rotation.x = -Math.PI / 2;
-    floor.castShadow = true;
-    floor.receiveShadow = true
-    floor.matrixAutoUpdate = false;
-    floor.updateMatrix();
-    this.scene.add(floor)
-  }
 
   addGrain() {
     this.composer = new EffectComposer(this.renderer);
@@ -168,6 +142,7 @@ class ThreeInit {
     let fogColor = new THREE.Color(col);
     this.scene.background = fogColor;
     this.scene.fog = new THREE.FogExp2(fogColor, 0.05);
+    // this.scene.fog.
     // this.scene.fog = new THREE.Fog(fogColor, 0.005, 25);
   }
 

@@ -66,10 +66,6 @@ class Objects {
             this.scene.add(pointLight);
             this.mainLight = pointLight
         }
-
-        // const sphereSize = 0.1;
-        // const pointLightHelper = new THREE.PointLightHelper(pointLight, sphereSize);
-        // this.scene.add(pointLightHelper);
     }
 
     addLights() {
@@ -88,56 +84,6 @@ class Objects {
         const helper = new THREE.DirectionalLightHelper(directionalLight, 5);
         this.scene.add(helper)
         this.scene.add(directionalLight);
-    }
-
-    addWall() {
-
-        let floorGeometry
-
-        if (!this.bufferGeo) {
-            floorGeometry = new THREE.PlaneGeometry(100, 100);
-        }
-        else {
-            floorGeometry = new THREE.PlaneBufferGeometry(100, 100);
-        }
-
-        var material = new THREE.ShaderMaterial({
-            uniforms: {
-                color1: {
-                    value: new THREE.Color("#2f0669")
-                },
-                color2: {
-                    value: new THREE.Color("#990b75")
-                }
-            },
-            vertexShader: `
-              varying vec2 vUv;
-          
-              void main() {
-                vUv = uv;
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-              }
-            `,
-            fragmentShader: `
-              uniform vec3 color1;
-              uniform vec3 color2;
-            
-              varying vec2 vUv;
-              
-              void main() {
-                
-                gl_FragColor = vec4(mix(color1, color2, vUv.x), 1.0);
-              }
-            `,
-        });
-
-        let floor = new THREE.Mesh(floorGeometry, material)
-        // floor.position.y = -0;
-        floor.position.z = -20;
-        // floor.rotation.x = -Math.PI / 2;
-        floor.castShadow = false;
-        floor.receiveShadow = false
-        this.scene.add(floor)
     }
 
     addFloor() {
@@ -226,6 +172,7 @@ class Objects {
                 mirror.position.z = -2;
                 mirror.rotation.x = -Math.PI / 2;
                 mirror.receiveShadow = true
+                this.mirror = mirror
                 this.scene.add(mirror)
             }
         }
@@ -288,10 +235,10 @@ class Objects {
             let floorGeometry
 
             if (!this.bufferGeo) {
-                floorGeometry = new THREE.PlaneGeometry(60, 60);
+                floorGeometry = new THREE.PlaneGeometry(80, 80);
             }
             else {
-                floorGeometry = new THREE.PlaneBufferGeometry(60, 60);
+                floorGeometry = new THREE.PlaneBufferGeometry(80, 80);
             }
 
             let col
@@ -329,19 +276,8 @@ class Objects {
         var innerRadius
         var height
 
-        // if (this.mobile) {
-        //     outerRadius = 1.99;
-        //     innerRadius = 1.9;
-        //     height = 0.55;
-        // }
-        // else {
-        //     outerRadius = 2.99;
-        //     innerRadius = 2.9;
-        //     height = 2.05;
-        // }
-
-        outerRadius = 2.99;
-        innerRadius = 2.9;
+        outerRadius = this.mobile ? 2.98 : 2.999;
+        innerRadius = this.mobile ? 2.9 : 2.95;
         height = 2.05;
 
         this.masterMesh = new THREE.Group()
@@ -350,41 +286,24 @@ class Objects {
         this.masterMesh.position.z = -2;
 
         if (!this.noScreenShader) {
-            var arcShape = new THREE.Shape();
-            arcShape.moveTo(outerRadius * 2, outerRadius);
-            arcShape.absarc(outerRadius, outerRadius, outerRadius, 0, Math.PI * 2, false);
-            var holePath = new THREE.Path();
-            holePath.moveTo(outerRadius + innerRadius, outerRadius);
-            holePath.absarc(outerRadius, outerRadius, innerRadius, 0, Math.PI * 2, true);
-            arcShape.holes.push(holePath);
+            
+            let geometry = new THREE.RingGeometry( innerRadius, outerRadius+0.01, 102 );
+            let material = new THREE.MeshBasicMaterial( { color: 0x000000, side: THREE.FrontSide } );
+            let mesh = new THREE.Mesh( geometry, material );
+            mesh.position.y = 1.05
+            mesh.rotation.x = -Math.PI/2
 
-            let screenGeo
-            if (!this.bufferGeo) {
-                screenGeo = new THREE.ExtrudeGeometry(arcShape, {
-                    depth: height,
-                    bevelEnabled: false,
-                    steps: 1,
-                    curveSegments: 100
-                });
-            }
-            else {
-                screenGeo = new THREE.ExtrudeBufferGeometry(arcShape, {
-                    depth: height,
-                    bevelEnabled: false,
-                    steps: 1,
-                    curveSegments: 100
-                });
-            }
+            this.masterMesh.add( mesh );
 
-            screenGeo.center();
-            screenGeo.rotateX(Math.PI * -.5);
-            let screenMat = [
-                new THREE.MeshLambertMaterial({ color: 0x000000, transparent: true, opacity: 1 }),
-                new THREE.MeshLambertMaterial({ color: 0x000000, transparent: true, opacity: 0.4 }),
-            ]
-            let geoMesh = new THREE.Mesh(screenGeo, screenMat)
-            geoMesh.position.y = 0.05
-            this.masterMesh.add(geoMesh)
+
+            geometry = new THREE.RingGeometry( innerRadius, outerRadius+0.01, 102 );
+            material = new THREE.MeshBasicMaterial( { color: 0x000000, side: THREE.FrontSide } );
+            mesh = new THREE.Mesh( geometry, material );
+            mesh.position.y = -0.97
+            mesh.rotation.x = Math.PI/2
+
+            this.masterMesh.add( mesh );
+
         }
 
         let geometry
@@ -505,8 +424,6 @@ class Objects {
         if (j == 4) {
             return
         }
-        // model.matrixAutoUpdate = false
-        this.scene.add(model)
         model.children.forEach((el, i) => {
             if (this.shadows) {
                 el.castShadow = true;
@@ -571,6 +488,7 @@ class Objects {
         else {
             model.position.set(this.position[j][i][0], this.position[j][i][1], this.position[j][i][2])
         }
+        this.scene.add(model)
     }
 
 

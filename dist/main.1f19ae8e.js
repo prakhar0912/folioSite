@@ -38364,12 +38364,13 @@ var ThreeInit = /*#__PURE__*/function () {
     this.mobile = mobile;
     this.aspect = this.container.clientWidth / this.container.clientHeight;
     this.camera = new THREE.PerspectiveCamera(this.mobile ? 85 : 65, this.aspect, 0.1, 1000);
-    this.camera.position.x = 4.857694276842902;
-    this.camera.position.y = 6.560754567944053;
-    this.camera.position.z = 5.028480970069918;
+    this.camera.position.x = 1.857694276842902;
+    this.camera.position.y = 4.960754567944053;
+    this.camera.position.z = 3.728480970069918;
     this.camera.rotation.x = -0.6132813005274419;
     this.camera.rotation.y = this.mobile ? 0.5 : 0.3006405553572554;
-    this.camera.rotation.z = 0.20548036184093635;
+    this.camera.rotation.z = 0.25548036184093635; // this.camera.lookAt(new THREE.Vector3(2,0,-2))
+
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       powerPreference: 'high-performance',
@@ -38396,10 +38397,8 @@ var ThreeInit = /*#__PURE__*/function () {
     if (!this.noBackground) {
       if (this.specialBackground) {
         this.addGrain();
-        console.log('ok');
       } else {
         this.addBackground();
-        console.log('ok');
       }
     }
 
@@ -38410,28 +38409,6 @@ var ThreeInit = /*#__PURE__*/function () {
   }
 
   _createClass(ThreeInit, [{
-    key: "addShape",
-    value: function addShape() {
-      var floorGeometry = new THREE.PlaneGeometry(20, 20);
-      var loader = new THREE.TextureLoader();
-      var basecolor = loader.load('marble/White_Marble_005_COLOR.jpg');
-      var occMap = loader.load('marble/White_Marble_005_OCC.jpg');
-      var roughnessMap = loader.load('marble/White_Marble_005_ROUGH.jpg'); // let basecolor = loader.load('marble/White_Marble_005_COLOR.jpg')
-
-      var floorMaterial = new THREE.MeshStandardMaterial({
-        map: basecolor
-      });
-      var floor = new THREE.Mesh(floorGeometry, floorMaterial);
-      floor.position.y = 0.1;
-      floor.position.z = 0;
-      floor.rotation.x = -Math.PI / 2;
-      floor.castShadow = true;
-      floor.receiveShadow = true;
-      floor.matrixAutoUpdate = false;
-      floor.updateMatrix();
-      this.scene.add(floor);
-    }
-  }, {
     key: "addGrain",
     value: function addGrain() {
       this.composer = new _EffectComposer.EffectComposer(this.renderer);
@@ -38513,7 +38490,8 @@ var ThreeInit = /*#__PURE__*/function () {
 
       var fogColor = new THREE.Color(col);
       this.scene.background = fogColor;
-      this.scene.fog = new THREE.FogExp2(fogColor, 0.05); // this.scene.fog = new THREE.Fog(fogColor, 0.005, 25);
+      this.scene.fog = new THREE.FogExp2(fogColor, 0.05); // this.scene.fog.
+      // this.scene.fog = new THREE.Fog(fogColor, 0.005, 25);
     }
   }, {
     key: "addGridHelper",
@@ -38647,6 +38625,7 @@ var Reflector = /*#__PURE__*/function (_Mesh) {
     material.uniforms.tDiffuse.value = renderTarget.texture;
     material.uniforms.tDepth.value = renderTarget.depthTexture;
     material.uniforms.color.value = color;
+    material.uniforms.depthMulti.value = 100000;
     material.uniforms.textureMatrix.value = textureMatrix;
     _this.material = material;
 
@@ -38773,10 +38752,14 @@ Reflector.ReflectorShader = {
     'cameraFar': {
       type: 'f',
       value: 0
+    },
+    'depthMulti': {
+      type: 'f',
+      value: 100000
     }
   },
   vertexShader: ['uniform mat4 textureMatrix;', 'varying vec4 vUv;', 'void main() {', '   vUv = textureMatrix * vec4( position, 1.0 );', '   gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );', '}'].join('\n'),
-  fragmentShader: ['#include <packing>', 'uniform vec3 color;', 'uniform sampler2D tDiffuse;', 'uniform sampler2D tDepth;', 'uniform float cameraNear;', 'uniform float cameraFar;', 'varying vec4 vUv;', 'float blendOverlay( float base, float blend ) {', '   return( base < 0.5 ? ( 2.0 * base * blend ) : ( 1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );', '}', 'vec3 blendOverlay( vec3 base, vec3 blend ) {', '   return vec3( blendOverlay( base.r, blend.r ), blendOverlay( base.g, blend.g ), blendOverlay( base.b, blend.b ) );', '}', 'float readDepth( sampler2D depthSampler, vec4 coord ) {', '   float fragCoordZ = texture2DProj( depthSampler, coord ).x;', '   float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );', '   return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );', '}', 'void main() {', '   vec4 base = texture2DProj( tDiffuse, vUv );', ' float depth = readDepth( tDepth, vUv );', '   gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 - ( depth * 100000.0 ) );', '}'].join('\n')
+  fragmentShader: ['#include <packing>', 'uniform vec3 color;', 'uniform sampler2D tDiffuse;', 'uniform sampler2D tDepth;', 'uniform float cameraNear;', 'uniform float cameraFar;', 'uniform float depthMulti;', 'varying vec4 vUv;', 'float blendOverlay( float base, float blend ) {', '   return( base < 0.5 ? ( 2.0 * base * blend ) : ( 1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );', '}', 'vec3 blendOverlay( vec3 base, vec3 blend ) {', '   return vec3( blendOverlay( base.r, blend.r ), blendOverlay( base.g, blend.g ), blendOverlay( base.b, blend.b ) );', '}', 'float readDepth( sampler2D depthSampler, vec4 coord ) {', '   float fragCoordZ = texture2DProj( depthSampler, coord ).x;', '   float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );', '   return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );', '}', 'void main() {', '   vec4 base = texture2DProj( tDiffuse, vUv );', ' float depth = readDepth( tDepth, vUv );', '   gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 - ( depth * depthMulti ) );', '}'].join('\n')
 };
 },{"three":"node_modules/three/build/three.module.js"}],"node_modules/three/examples/jsm/loaders/GLTFLoader.js":[function(require,module,exports) {
 "use strict";
@@ -42653,10 +42636,7 @@ var Objects = /*#__PURE__*/function () {
         pointLight.position.set(-4, 4, -2);
         this.scene.add(pointLight);
         this.mainLight = pointLight;
-      } // const sphereSize = 0.1;
-      // const pointLightHelper = new THREE.PointLightHelper(pointLight, sphereSize);
-      // this.scene.add(pointLightHelper);
-
+      }
     }
   }, {
     key: "addLights",
@@ -42675,37 +42655,6 @@ var Objects = /*#__PURE__*/function () {
       var helper = new THREE.DirectionalLightHelper(directionalLight, 5);
       this.scene.add(helper);
       this.scene.add(directionalLight);
-    }
-  }, {
-    key: "addWall",
-    value: function addWall() {
-      var floorGeometry;
-
-      if (!this.bufferGeo) {
-        floorGeometry = new THREE.PlaneGeometry(100, 100);
-      } else {
-        floorGeometry = new THREE.PlaneBufferGeometry(100, 100);
-      }
-
-      var material = new THREE.ShaderMaterial({
-        uniforms: {
-          color1: {
-            value: new THREE.Color("#2f0669")
-          },
-          color2: {
-            value: new THREE.Color("#990b75")
-          }
-        },
-        vertexShader: "\n              varying vec2 vUv;\n          \n              void main() {\n                vUv = uv;\n                gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);\n              }\n            ",
-        fragmentShader: "\n              uniform vec3 color1;\n              uniform vec3 color2;\n            \n              varying vec2 vUv;\n              \n              void main() {\n                \n                gl_FragColor = vec4(mix(color1, color2, vUv.x), 1.0);\n              }\n            "
-      });
-      var floor = new THREE.Mesh(floorGeometry, material); // floor.position.y = -0;
-
-      floor.position.z = -20; // floor.rotation.x = -Math.PI / 2;
-
-      floor.castShadow = false;
-      floor.receiveShadow = false;
-      this.scene.add(floor);
     }
   }, {
     key: "addFloor",
@@ -42787,6 +42736,7 @@ var Objects = /*#__PURE__*/function () {
           mirror.position.z = -2;
           mirror.rotation.x = -Math.PI / 2;
           mirror.receiveShadow = true;
+          this.mirror = mirror;
           this.scene.add(mirror);
         }
       } else {
@@ -42835,9 +42785,9 @@ var Objects = /*#__PURE__*/function () {
         var _floorGeometry;
 
         if (!this.bufferGeo) {
-          _floorGeometry = new THREE.PlaneGeometry(60, 60);
+          _floorGeometry = new THREE.PlaneGeometry(80, 80);
         } else {
-          _floorGeometry = new THREE.PlaneBufferGeometry(60, 60);
+          _floorGeometry = new THREE.PlaneBufferGeometry(80, 80);
         }
 
         var _col;
@@ -42874,19 +42824,9 @@ var Objects = /*#__PURE__*/function () {
     value: function addScreenSegment() {
       var outerRadius;
       var innerRadius;
-      var height; // if (this.mobile) {
-      //     outerRadius = 1.99;
-      //     innerRadius = 1.9;
-      //     height = 0.55;
-      // }
-      // else {
-      //     outerRadius = 2.99;
-      //     innerRadius = 2.9;
-      //     height = 2.05;
-      // }
-
-      outerRadius = 2.99;
-      innerRadius = 2.9;
+      var height;
+      outerRadius = this.mobile ? 2.98 : 2.999;
+      innerRadius = this.mobile ? 2.9 : 2.95;
       height = 2.05;
       this.masterMesh = new THREE.Group();
       this.masterMesh.position.x = -4;
@@ -42894,45 +42834,27 @@ var Objects = /*#__PURE__*/function () {
       this.masterMesh.position.z = -2;
 
       if (!this.noScreenShader) {
-        var arcShape = new THREE.Shape();
-        arcShape.moveTo(outerRadius * 2, outerRadius);
-        arcShape.absarc(outerRadius, outerRadius, outerRadius, 0, Math.PI * 2, false);
-        var holePath = new THREE.Path();
-        holePath.moveTo(outerRadius + innerRadius, outerRadius);
-        holePath.absarc(outerRadius, outerRadius, innerRadius, 0, Math.PI * 2, true);
-        arcShape.holes.push(holePath);
-        var screenGeo;
+        var _geometry2 = new THREE.RingGeometry(innerRadius, outerRadius + 0.01, 102);
 
-        if (!this.bufferGeo) {
-          screenGeo = new THREE.ExtrudeGeometry(arcShape, {
-            depth: height,
-            bevelEnabled: false,
-            steps: 1,
-            curveSegments: 100
-          });
-        } else {
-          screenGeo = new THREE.ExtrudeBufferGeometry(arcShape, {
-            depth: height,
-            bevelEnabled: false,
-            steps: 1,
-            curveSegments: 100
-          });
-        }
+        var _material = new THREE.MeshBasicMaterial({
+          color: 0x000000,
+          side: THREE.FrontSide
+        });
 
-        screenGeo.center();
-        screenGeo.rotateX(Math.PI * -.5);
-        var screenMat = [new THREE.MeshLambertMaterial({
+        var _mesh = new THREE.Mesh(_geometry2, _material);
+
+        _mesh.position.y = 1.05;
+        _mesh.rotation.x = -Math.PI / 2;
+        this.masterMesh.add(_mesh);
+        _geometry2 = new THREE.RingGeometry(innerRadius, outerRadius + 0.01, 102);
+        _material = new THREE.MeshBasicMaterial({
           color: 0x000000,
-          transparent: true,
-          opacity: 1
-        }), new THREE.MeshLambertMaterial({
-          color: 0x000000,
-          transparent: true,
-          opacity: 0.4
-        })];
-        var geoMesh = new THREE.Mesh(screenGeo, screenMat);
-        geoMesh.position.y = 0.05;
-        this.masterMesh.add(geoMesh);
+          side: THREE.FrontSide
+        });
+        _mesh = new THREE.Mesh(_geometry2, _material);
+        _mesh.position.y = -0.97;
+        _mesh.rotation.x = Math.PI / 2;
+        this.masterMesh.add(_mesh);
       }
 
       var geometry;
@@ -43065,10 +42987,8 @@ var Objects = /*#__PURE__*/function () {
 
       if (j == 4) {
         return;
-      } // model.matrixAutoUpdate = false
+      }
 
-
-      this.scene.add(model);
       model.children.forEach(function (el, i) {
         if (_this2.shadows) {
           el.castShadow = true;
@@ -43132,6 +43052,8 @@ var Objects = /*#__PURE__*/function () {
       } else {
         model.position.set(this.position[j][i][0], this.position[j][i][1], this.position[j][i][2]);
       }
+
+      this.scene.add(model);
     }
   }]);
 
@@ -48793,6 +48715,8 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -48801,8 +48725,6 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 var Anime = /*#__PURE__*/function () {
   function Anime(_ref) {
-    var _this = this;
-
     var scene = _ref.scene,
         renderer = _ref.renderer,
         camera = _ref.camera,
@@ -48813,7 +48735,10 @@ var Anime = /*#__PURE__*/function () {
         snappingAnime = _ref.snappingAnime,
         mainLight = _ref.mainLight,
         videoMaterials = _ref.videoMaterials,
-        mobileFloorMesh = _ref.mobileFloorMesh;
+        mobileFloorMesh = _ref.mobileFloorMesh,
+        circularMesh = _ref.circularMesh,
+        mirror = _ref.mirror,
+        options = _ref.options;
 
     _classCallCheck(this, Anime);
 
@@ -48823,11 +48748,18 @@ var Anime = /*#__PURE__*/function () {
     this.camera = camera;
     this.mobile = mobile;
     this.orbital = orbital;
+    this.options = options;
     this.stickToCenterAnime = stickToCenterAnime;
     this.snappingAnime = snappingAnime;
     this.mainLight = mainLight;
     this.mobileFloorMesh = mobileFloorMesh;
-    this.stopAnime = false;
+    this.circularMesh = circularMesh;
+
+    if (!this.mobile) {
+      this.mirror = mirror;
+    }
+
+    this.stopAnime = true;
     this.offset = new THREE.Vector2();
     this.positionOffset = new THREE.Vector3();
     this.positionOffset.z = 5.5;
@@ -48837,24 +48769,37 @@ var Anime = /*#__PURE__*/function () {
     this.rot = false;
     this.oldTime = 0;
     this.time = 0.001;
+    this.radius = this.mobile ? 4 : 5;
     this.randomRotNum = 0;
-    this.screenPos = [Math.PI / 2.3 + 0 * (Math.PI / 2), Math.PI / 2.3 + 1 * (Math.PI / 2), Math.PI / 2.3 + 2 * (Math.PI / 2), Math.PI / 2.3 + 3 * (Math.PI / 2)];
-    this.snapOffset = this.stickToCenterAnime ? 0.7 : 0.5;
+    this.fogValue = 0.05;
+    this.z = Math.cos(0) * 6 - 2;
+    this.x = Math.sin(0) * 6 - 4;
+    this.screenPos = [-(0.50 + Math.PI / 5.6 + 3 * (Math.PI / 2)), -(0.50 + Math.PI / 5.6 + 2 * (Math.PI / 2)), -(0.50 + Math.PI / 5.6 + 1 * (Math.PI / 2)), -(0.50 + Math.PI / 5.6 + 0 * (Math.PI / 2)), Math.PI / 5.6 + 0 * (Math.PI / 2), Math.PI / 5.6 + 1 * (Math.PI / 2), Math.PI / 5.6 + 2 * (Math.PI / 2), Math.PI / 5.6 + 3 * (Math.PI / 2)];
+    this.screenMap = {
+      google: 3,
+      yellow: 2,
+      black: 1,
+      green: 0
+    };
+    this.snapOffset = this.stickToCenterAnime ? 0.4 : 0.5;
     this.snapTo = 1;
     this.snapToAnime = null;
+    this.currentSection = 0;
+    this.speed = 0;
+    this.oldSnapTo = 2;
+    this.stopTilt = true;
+    this.startFogAnime = false;
+    this.fogColor = "#c81cf3";
+    this.projFogColors = ["#1af76e", "#000000", "#fffb22", "#3cff22"];
+    this.currentLookAt = new THREE.Vector3(2, 0, -2);
     this.videoMaterials = videoMaterials;
+    this.totalPi = Math.PI / 4;
 
     if (!this.mobile) {
       this.cameraShake();
     }
 
     this.rotInf();
-
-    if (!this.orbital) {
-      setTimeout(function () {
-        _this.goToProjects();
-      }, 3000);
-    }
   }
 
   _createClass(Anime, [{
@@ -48864,21 +48809,13 @@ var Anime = /*#__PURE__*/function () {
 
       if (side) {
         if (num2 < num1) {
-          if (num1 > this.screenPos[3]) {
-            return 2 * Math.PI - num1 + num2;
-          } else {
-            return num1 - num2;
-          }
+          return num1 - num2;
         } else {
           return num2 - num1;
         }
       } else {
         if (num1 < num2) {
-          if (num1 < this.screenPos[0]) {
-            return num1 + (2 * Math.PI - num2);
-          } else {
-            return num2 - num1;
-          }
+          return num2 - num1;
         } else {
           return num1 - num2;
         }
@@ -48889,9 +48826,9 @@ var Anime = /*#__PURE__*/function () {
     value: function snapToScreen() {
       var dist = 0;
       var leastDist = 100;
-      var scrollPos = this.screen.rotation.y > 0 ? this.screen.rotation.y : (2 * Math.PI - Math.abs(this.screen.rotation.y)) % (2 * Math.PI);
+      var scrollPos = this.totalPi;
 
-      for (var i = 0; i < 4; i++) {
+      for (var i = 0; i < 8; i++) {
         if (this.stickToCenterAnime) {
           dist = this.absDist(scrollPos, this.screenPos[i]);
         } else {
@@ -48909,14 +48846,30 @@ var Anime = /*#__PURE__*/function () {
       }
 
       if (leastDist < this.snapOffset) {
-        // if (this.snapToAnime) {
-        //     this.snapToAnime.kill()
-        // }
-        // if (this.moveScreenAnime.isActive()) {
-        //     this.snapToAnime.kill()
-        // }
-        this.decideClosestSnapTo(scrollPos);
+        this.oldSnapTo != this.snapTo && this.options.showProject(this.snapTo % 4, this.dir ? 'f' : 'b');
+
+        if (this.snappingAnime) {
+          this.decideClosestSnapTo(scrollPos);
+        }
+
+        this.changeFogColor();
+        this.oldSnapTo = this.snapTo;
+      } else {// this.options.removeProject()
       }
+    }
+  }, {
+    key: "changeFogColor",
+    value: function changeFogColor() {
+      var _this = this;
+
+      this.fogColAnime = _gsap.default.to(this, {
+        fogColor: this.projFogColors[this.snapTo % 4],
+        duration: 1,
+        onUpdate: function onUpdate() {
+          _this.scene.background = new THREE.Color(_this.fogColor);
+          _this.scene.fog = new THREE.FogExp2(_this.fogColor, 0.1);
+        }
+      });
     }
   }, {
     key: "decideClosestSnapTo",
@@ -48924,15 +48877,9 @@ var Anime = /*#__PURE__*/function () {
       var dist = this.absDist(scrollPos, this.screenPos[this.snapTo]);
 
       if (this.dir) {
-        this.snapToAnime = _gsap.default.to(this.screen.rotation, {
-          y: this.screen.rotation.y + dist,
-          duration: 0.8
-        });
+        this.moveToScreen(dist);
       } else {
-        this.snapToAnime = _gsap.default.to(this.screen.rotation, {
-          y: this.screen.rotation.y - dist,
-          duration: 0.8
-        });
+        this.moveToScreen(-dist);
       }
     }
   }, {
@@ -48941,31 +48888,45 @@ var Anime = /*#__PURE__*/function () {
       var _this2 = this;
 
       this.randomRotation = setInterval(function () {
-        if (_this2.randomRotAnime) {
-          _this2.randomRotAnime.kill();
-        }
+        _this2.rotateTo(_this2.randomRotNum);
 
-        _this2.randomRotAnime = _gsap.default.to(_this2.screen.rotation, {
-          y: Math.PI / 2.3 + _this2.randomRotNum * (Math.PI / 2),
-          duration: 2.5,
-          ease: "power4.out"
-        });
         _this2.randomRotNum++;
+
+        if (_this2.randomRotNum > 3) {
+          _this2.randomRotNum = 0;
+        }
       }, 5000);
+    }
+  }, {
+    key: "rotateTo",
+    value: function rotateTo(num) {
+      var _this3 = this;
+
+      if (this.randomRotAnime) {
+        this.randomRotAnime.kill();
+      }
+
+      this.randomRotAnime = _gsap.default.to(this.screen.rotation, {
+        y: Math.PI / 2.3 + num * (Math.PI / 2),
+        duration: 2.5,
+        ease: "power4.out",
+        onComplete: function onComplete() {
+          if (_this3.currentSection == 1) {
+            _this3.options.showProject(num, 's');
+          }
+        }
+      });
     }
   }, {
     key: "stopRotInf",
     value: function stopRotInf() {
-      clearInterval(this.randomRotation);
-    } // addDragListeners() {
-    //     this.rotStart = this.rotateStart.bind(this)
-    //     this.rotMov = this.rotateMove.bind(this)
-    //     this.rotUp = this.rotateUp.bind(this)
-    //     document.addEventListener('mousedown', this.rotStart)
-    //     document.addEventListener('mousemove', this.rotMov)
-    //     document.addEventListener('mouseup', this.rotUp)
-    // }
+      if (this.randomRotAnime) {
+        this.randomRotAnime.kill();
+      }
 
+      clearInterval(this.randomRotation);
+      this.randomRotation = null;
+    }
   }, {
     key: "addWheelListeners",
     value: function addWheelListeners() {
@@ -48975,16 +48936,16 @@ var Anime = /*#__PURE__*/function () {
       this.rotStart = this.rotateStart.bind(this);
       this.rotMov = this.rotateMove.bind(this);
       this.rotUp = this.rotateUp.bind(this);
-      document.addEventListener(this.mobile ? 'touchstart' : 'mousedown', this.rotStart);
-      document.addEventListener(this.mobile ? 'touchmove' : 'mousemove', this.rotMov);
-      document.addEventListener(this.mobile ? 'touchend' : 'mouseup', this.rotUp);
+      window.addEventListener(this.mobile ? 'touchstart' : 'mousedown', this.rotStart);
+      window.addEventListener(this.mobile ? 'touchmove' : 'mousemove', this.rotMov);
+      window.addEventListener(this.mobile ? 'touchend' : 'mouseup', this.rotUp);
     }
   }, {
     key: "removeDragListeners",
     value: function removeDragListeners() {
-      document.removeEventListener(this.mobile ? 'touchstart' : 'mousedown', this.rotStart);
-      document.removeEventListener(this.mobile ? 'touchmove' : 'mousemove', this.rotMov);
-      document.removeEventListener(this.mobile ? 'touchend' : 'mouseup', this.rotUp);
+      window.removeEventListener(this.mobile ? 'touchstart' : 'mousedown', this.rotStart);
+      window.removeEventListener(this.mobile ? 'touchmove' : 'mousemove', this.rotMov);
+      window.removeEventListener(this.mobile ? 'touchend' : 'mouseup', this.rotUp);
     }
   }, {
     key: "rotateMove",
@@ -48998,7 +48959,7 @@ var Anime = /*#__PURE__*/function () {
       }
 
       if (this.snappingAnime) {
-        if (this.snapToAnime.isActive()) {
+        if (this.snapToAnime && this.snapToAnime.isActive()) {
           this.snapToAnime.kill();
         }
       }
@@ -49020,7 +48981,7 @@ var Anime = /*#__PURE__*/function () {
   }, {
     key: "rotateScreen",
     value: function rotateScreen(dx) {
-      this.dx = dx;
+      this.dx = -dx;
     }
   }, {
     key: "rotateStart",
@@ -49030,7 +48991,7 @@ var Anime = /*#__PURE__*/function () {
       }
 
       if (this.snappingAnime) {
-        if (this.snapToAnime.isActive()) {
+        if (this.snapToAnime && this.snapToAnime.isActive()) {
           this.snapToAnime.kill();
         }
       }
@@ -49046,85 +49007,304 @@ var Anime = /*#__PURE__*/function () {
         evt.preventDefault();
       }
 
-      this.mouseDown = false; // if (this.shakeAnime) {
-      //     this.shakeAnime.kill()
-      // }
+      this.mouseDown = false;
+      this.snapToScreen(false);
+    }
+  }, {
+    key: "goToSection",
+    value: function goToSection(to) {
+      if (this.currentSection == to) {
+        return;
+      }
 
-      if (this.snappingAnime) {
-        this.snapToScreen();
-      } // this.shakeAnime = gsap.to(this.camera.rotation, { z: 0, duration: 3 })
-      // this.snapToScreen()
+      if (this.currentSection == 1) {
+        this.stopTilt = true;
+        this.removeDragListeners();
+      }
 
+      if (to == 0) {
+        this.goToHome();
+        this.currentSection = 0;
+      } else if (to == 1) {
+        this.goToProjects();
+        this.currentSection = 1;
+        this.stopTilt = false;
+      } else if (to == 2) {
+        this.goToAbout();
+        this.currentSection = 2;
+      } // this.currentSection = to
+
+    }
+  }, {
+    key: "goToHome",
+    value: function goToHome() {
+      this.onProjectsOptimizations(2);
+
+      if (!this.randomRotation) {
+        this.rotInf();
+      }
+
+      this.playGoToAnime(0);
     }
   }, {
     key: "goToProjects",
     value: function goToProjects() {
-      var _this3 = this;
-
       this.stopAnime = true;
-      this.section = 'projects';
       this.stopRotInf();
-      var timer = 1;
+      this.playGoToAnime(1);
+      this.rotateTo(0);
+    }
+  }, {
+    key: "goToAbout",
+    value: function goToAbout() {
+      this.onProjectsOptimizations(2);
 
-      _gsap.default.to(this.mainLight, {
-        intensity: 3,
-        duration: timer * 2
-      });
+      if (!this.randomRotation) {
+        this.rotInf();
+      }
 
-      _gsap.default.to(this.camera.rotation, {
-        z: -0.4,
-        duration: timer
-      });
+      this.playGoToAnime(2);
+    }
+  }, {
+    key: "playGoToAnime",
+    value: function playGoToAnime(section) {
+      var _this4 = this;
 
-      _gsap.default.to(this.camera.rotation, {
-        z: 0,
-        duration: timer,
-        delay: timer
-      });
+      this.goToAnimeRunning = true;
 
-      _gsap.default.to(this.camera.position, {
-        z: this.mobile ? 0.9 : 2.5,
-        y: this.mobile ? 0.45 : 0.7,
-        x: -1,
-        duration: 2 * timer
-      });
+      if (this.projAnime) {
+        this.projAnime.kill();
+      }
 
-      _gsap.default.to(this.camera.rotation, {
-        y: this.mobile ? 0.8 : 0.55,
-        duration: timer,
-        delay: 2 * timer - 0.5
-      });
+      if (this.homeAnime) {
+        this.homeAnime.kill();
+      }
 
-      _gsap.default.to(this.camera.rotation, {
-        x: 0,
-        duration: timer,
-        delay: 2 * timer - 0.5
-      });
+      if (this.aboutAnime) {
+        this.aboutAnime.kill();
+      }
 
-      this.offset.x = 0.027933;
-      this.offset.y = 0.635915;
-      this.offset.z = 0;
-      setTimeout(function () {
-        _this3.onProjectsOptimizations();
+      if (section == 0) {
+        this.homeAnime = _gsap.default.timeline({
+          onComplete: function onComplete() {
+            _this4.goToAnimeRunning = false;
+            console.log('completed home');
+          }
+        });
 
-        _this3.offset.x = 0;
-        _this3.offset.y = _this3.mobile ? 0.8 : 0.55;
+        if (this.shakeAnime) {
+          this.shakeAnime.kill();
+        }
 
-        _this3.addWheelListeners();
-      }, 3000 * timer);
+        if (this.moveScreenAnime) {
+          this.moveScreenAnime.kill();
+        }
+
+        var timer = 1;
+        this.homeAnime.to(this.mainLight, {
+          intensity: 20,
+          duration: timer * 2
+        });
+
+        if (!this.mobile) {
+          var _this$homeAnime$to, _this$homeAnime$to2;
+
+          this.homeAnime.to('.overlay', (_this$homeAnime$to = {
+            opacity: 1,
+            duration: 1
+          }, _defineProperty(_this$homeAnime$to, "duration", timer), _defineProperty(_this$homeAnime$to, "delay", -timer), _this$homeAnime$to));
+          this.homeAnime.to('.overlay1', (_this$homeAnime$to2 = {
+            opacity: 0,
+            duration: 1
+          }, _defineProperty(_this$homeAnime$to2, "duration", timer), _defineProperty(_this$homeAnime$to2, "delay", -timer), _this$homeAnime$to2));
+        }
+
+        this.homeAnime.to(this, {
+          fogValue: 0.05,
+          duration: timer,
+          delay: -timer,
+          onUpdate: function onUpdate() {
+            _this4.scene.background = new THREE.Color(0xc81cf3);
+            _this4.scene.fog = new THREE.FogExp2(0xc81cf3, _this4.fogValue);
+          }
+        });
+        this.homeAnime.to(this.camera.position, {
+          x: 1.857694276842902,
+          y: 4.960754567944053,
+          z: 3.728480970069918,
+          duration: 2 * timer,
+          delay: -2 * timer
+        });
+        this.homeAnime.to(this.camera.rotation, {
+          x: -0.6132813005274419,
+          z: 0.25548036184093635,
+          y: this.mobile ? 0.5 : 0.3006405553572554,
+          duration: timer,
+          delay: -(2 * timer)
+        });
+      } else if (section == 1) {
+        this.projAnime = _gsap.default.timeline({
+          onComplete: function onComplete() {
+            console.log('completed proj');
+            _this4.goToAnimeRunning = false;
+            _this4.startFogAnime = true;
+
+            _this4.addWheelListeners();
+
+            _this4.onProjectsOptimizations(1);
+
+            _this4.snapToScreen();
+
+            _this4.currentSection = 1;
+          }
+        });
+        var _timer = 1;
+        this.projAnime.to(this.mainLight, {
+          intensity: 1,
+          duration: _timer * 2
+        });
+
+        if (!this.mobile) {
+          var _this$projAnime$to, _this$projAnime$to2;
+
+          this.projAnime.to('.overlay', (_this$projAnime$to = {
+            opacity: 0,
+            duration: 1
+          }, _defineProperty(_this$projAnime$to, "duration", _timer), _defineProperty(_this$projAnime$to, "delay", -_timer), _this$projAnime$to));
+          this.projAnime.to('.overlay1', (_this$projAnime$to2 = {
+            opacity: 1,
+            duration: 1
+          }, _defineProperty(_this$projAnime$to2, "duration", _timer), _defineProperty(_this$projAnime$to2, "delay", -_timer), _this$projAnime$to2));
+        }
+
+        this.projAnime.to(this, {
+          fogValue: 0.15,
+          duration: _timer,
+          delay: -_timer,
+          onUpdate: function onUpdate() {
+            _this4.scene.fog = new THREE.FogExp2(0xc81cf3, _this4.fogValue);
+          }
+        });
+        this.projAnime.to(this.camera.position, {
+          z: Math.cos(Math.PI / 4) * this.radius - 2,
+          y: this.mobile ? 0.45 : 1,
+          x: Math.sin(Math.PI / 4) * this.radius - 4,
+          duration: 2 * _timer,
+          delay: -2 * _timer
+        });
+        var spec = true;
+        this.projAnime.to(this.camera.rotation, {
+          x: spec ? 0 : -0.16623955441733898,
+          y: this.mobile ? 0.8 : 0.7784574305475266,
+          z: spec ? 0 : 0.11727709241617727,
+          duration: _timer,
+          delay: -(2 * _timer)
+        });
+      } else if (section == 2) {
+        this.aboutAnime = _gsap.default.timeline({
+          onComplete: function onComplete() {
+            _this4.currentSection = 2;
+            _this4.goToAnimeRunning = false;
+            console.log('completed about');
+          }
+        });
+
+        if (this.shakeAnime) {
+          this.shakeAnime.kill();
+        }
+
+        if (this.moveScreenAnime) {
+          this.moveScreenAnime.kill();
+        }
+
+        var _timer2 = 1;
+        this.aboutAnime.to(this.mainLight, {
+          intensity: this.mobile ? 10 : 20,
+          duration: _timer2 * 2
+        });
+
+        if (!this.mobile) {
+          var _this$aboutAnime$to, _this$aboutAnime$to2;
+
+          this.aboutAnime.to('.overlay', (_this$aboutAnime$to = {
+            opacity: 1,
+            duration: 1
+          }, _defineProperty(_this$aboutAnime$to, "duration", _timer2), _defineProperty(_this$aboutAnime$to, "delay", -_timer2), _this$aboutAnime$to));
+          this.aboutAnime.to('.overlay1', (_this$aboutAnime$to2 = {
+            opacity: 0,
+            duration: 1
+          }, _defineProperty(_this$aboutAnime$to2, "duration", _timer2), _defineProperty(_this$aboutAnime$to2, "delay", -_timer2), _this$aboutAnime$to2));
+        }
+
+        this.aboutAnime.to(this, {
+          fogValue: 0.05,
+          duration: _timer2,
+          delay: -_timer2,
+          onUpdate: function onUpdate() {
+            _this4.scene.background = new THREE.Color(0xc81cf3);
+            _this4.scene.fog = new THREE.FogExp2(0xc81cf3, _this4.fogValue);
+          }
+        });
+        this.aboutAnime.to(this.camera.position, {
+          x: this.mobile ? -4 : -9.925,
+          y: this.mobile ? 8 : 12.96,
+          z: this.mobile ? -2.11 : 1.3,
+          duration: 2 * _timer2,
+          delay: -2 * _timer2
+        });
+        this.aboutAnime.to(this.camera.rotation, {
+          x: this.mobile ? -Math.PI / 2 : -1.724,
+          y: this.mobile ? 0 : -0.22,
+          z: this.mobile ? -0.0 : -2.18,
+          duration: _timer2,
+          delay: -(2 * _timer2)
+        });
+      }
     }
   }, {
     key: "onProjectsOptimizations",
-    value: function onProjectsOptimizations() {
-      this.videoMaterials.forEach(function (el) {
-        el.side = THREE.FrontSide;
-      });
+    value: function onProjectsOptimizations(section) {
+      console.log('opt', section);
 
-      if (this.mobile) {
-        this.mobileFloorMesh.material = new THREE.MeshBasicMaterial({
-          color: new THREE.Color(0x141414)
-        });
+      if (section == this.oldOpt) {
+        return;
       }
+
+      if (section == 1) {
+        this.videoMaterials.forEach(function (el) {
+          el.side = THREE.FrontSide;
+        });
+
+        if (this.mobile) {
+          this.mobileFloorMesh.material = new THREE.MeshBasicMaterial({
+            color: new THREE.Color(0x141414)
+          });
+        } else {
+          _gsap.default.to(this.mirror.material.uniforms.depthMulti, {
+            value: 20000,
+            duration: 2
+          });
+        }
+      } else if (section == 2) {
+        this.videoMaterials.forEach(function (el) {
+          el.side = THREE.DoubleSide;
+        });
+
+        if (this.mobile) {
+          this.mobileFloorMesh.material = new THREE.MeshPhongMaterial({
+            color: new THREE.Color(0xffffff),
+            reflectivity: 1,
+            shininess: 10
+          });
+        } else {
+          _gsap.default.to(this.mirror.material.uniforms.depthMulti, {
+            value: 100000,
+            duration: 2
+          });
+        }
+      }
+
+      this.oldOpt = section;
     }
   }, {
     key: "wheelMove",
@@ -49162,7 +49342,7 @@ var Anime = /*#__PURE__*/function () {
   }, {
     key: "onMouseWheel",
     value: function onMouseWheel(event) {
-      if (this.section == 'projects') {
+      if (this.currentSection == 1) {
         return;
       }
 
@@ -49184,25 +49364,30 @@ var Anime = /*#__PURE__*/function () {
   }, {
     key: "onKeyPress",
     value: function onKeyPress(e) {
-      if (e.key == 't') {
-        this.goToProjects();
+      if (!isNaN(e.key)) {
+        this.goToSection(Number(e.key));
       }
 
       if (e.key == 'n') {
         console.log(this.camera.position, this.camera.rotation);
       }
+
+      if (e.key == 't') {
+        console.log(this.totalPi);
+      }
     }
   }, {
     key: "moveScreen",
     value: function moveScreen() {
-      // if (this.dx == 0) {
-      //     return
-      // }
       this.timeDelta = this.time - this.oldTime;
-      this.speed = this.dx / this.timeDelta * 5;
+      this.speed = this.dx / this.timeDelta * 10;
 
       if (this.mobile) {
-        this.speed *= 4;
+        this.speed *= 2;
+
+        if (Math.abs(this.speed) < 20) {
+          this.speed *= 3.6;
+        }
       }
 
       if (isNaN(this.speed)) {
@@ -49215,27 +49400,53 @@ var Anime = /*#__PURE__*/function () {
         this.snapToAnime.kill();
       }
 
-      this.dir = this.pi > 0 ? true : false; // if (this.pi > 0.1) {
-      //     if (this.shakeAnime) {
-      //         this.shakeAnime.kill()
-      //     }
-      //     this.shakeAnime = gsap.to(this.camera.rotation, { z: 0.4 * this.speed, duration: 3 })
-      // }
-      // if (this.pi < 0.1) {
-      //     if (this.shakeAnime) {
-      //         this.shakeAnime.kill()
-      //     }
-      //     this.shakeAnime = gsap.to(this.camera.rotation, { z: 0, duration: 3 })
-      // }
+      this.dir = this.pi > 0 ? true : false;
+      this.moveToScreen(this.pi);
+    }
+  }, {
+    key: "moveToScreen",
+    value: function moveToScreen(pi) {
+      var _this5 = this;
 
-      this.moveScreenAnime = _gsap.default.to(this.screen.rotation, {
-        y: this.screen.rotation.y + this.pi,
-        duration: 0.8
+      if (this.moveScreenAnime) {
+        this.moveScreenAnime.kill();
+      } // console.log(this.totalPi + pi)
+
+
+      this.moveScreenAnime = _gsap.default.to(this, {
+        totalPi: this.totalPi + pi,
+        onUpdate: function onUpdate() {
+          var z = Math.cos(_this5.totalPi) * _this5.radius - 2;
+          var x = Math.sin(_this5.totalPi) * _this5.radius - 4;
+          _this5.camera.position.x = x;
+          _this5.camera.position.z = z;
+          _this5.camera.rotation.y = _this5.totalPi;
+        },
+        duration: this.mobile ? 1.5 : 0.6
       });
-
-      if (Math.abs(this.screen.rotation.y) > 2 * Math.PI) {
-        this.screen.rotation.y = this.screen.rotation.y % (2 * Math.PI);
+    }
+  }, {
+    key: "tiltCam",
+    value: function tiltCam() {
+      if (this.shakeAnime) {
+        this.shakeAnime.kill();
       }
+
+      if (Math.abs(this.dx) < 20 && Math.abs(this.dx) > 2) {
+        return;
+      }
+
+      this.shakeAnime = _gsap.default.to(this.camera.rotation, {
+        z: this.dx * -0.05,
+        duration: Math.abs(this.dx) < 10 ? 1 : 15
+      });
+    }
+  }, {
+    key: "sleep",
+    value: function sleep(ms) {
+      return new Promise(function (resolve) {
+        return setTimeout(resolve, ms);
+      });
     }
   }, {
     key: "mouseCameraMovement",
@@ -49248,7 +49459,7 @@ var Anime = /*#__PURE__*/function () {
       _gsap.default.to(this.camera.rotation, {
         x: this.final.x + this.offset.x,
         y: this.final.y + this.offset.y,
-        duration: 0.002
+        duration: 0.001
       });
     }
   }, {
@@ -49260,8 +49471,22 @@ var Anime = /*#__PURE__*/function () {
         this.mouseCameraMovement();
       }
 
-      if (this.mouseDown) {
-        this.moveScreen();
+      if (this.currentSection == 1) {
+        if (Math.abs(this.totalPi) > 2 * Math.PI) {
+          this.totalPi = this.totalPi % (2 * Math.PI);
+        }
+
+        if (!this.stopTilt && !this.mobile) {
+          this.tiltCam();
+        }
+
+        if (this.startFogAnime) {
+          this.snapToScreen(true);
+        }
+
+        if (this.mouseDown && !this.stopTilt) {
+          this.moveScreen();
+        }
       }
 
       this.oldTime = this.time;
@@ -49273,7 +49498,192 @@ var Anime = /*#__PURE__*/function () {
 }();
 
 exports.Anime = Anime;
-},{"three":"node_modules/three/build/three.module.js","gsap":"node_modules/gsap/index.js"}],"node_modules/three/examples/jsm/libs/stats.module.js":[function(require,module,exports) {
+},{"three":"node_modules/three/build/three.module.js","gsap":"node_modules/gsap/index.js"}],"js/Content.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Content = void 0;
+
+var _gsap = _interopRequireDefault(require("gsap"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Content = /*#__PURE__*/function () {
+  function Content(_ref) {
+    var goToSection = _ref.goToSection,
+        camera = _ref.camera,
+        mobile = _ref.mobile;
+
+    _classCallCheck(this, Content);
+
+    this.masterContainer = document.querySelector(".container");
+    this.sections = document.querySelectorAll(".content > div");
+    this.projectContainers = document.querySelectorAll(".second > div");
+    this.navBtns = document.querySelectorAll('.nav-cont > div');
+    this.mobile = mobile;
+    this.camera = camera;
+    this.currentSection = 0;
+    this.addEventListeners();
+    this.goToSectionAnime = goToSection;
+    this.contentAnimations();
+    this.animateNav(0);
+  }
+
+  _createClass(Content, [{
+    key: "removeProject",
+    value: function removeProject() {// this.hideAll('projects')
+    }
+  }, {
+    key: "showProject",
+    value: function showProject(num, dir) {
+      console.log(num, dir);
+      this.hideAll('projects');
+      this.projectContainers[num].classList.remove('hide-project');
+    }
+  }, {
+    key: "hideAll",
+    value: function hideAll(type) {
+      if (type == 'sections') {
+        for (var i = 0; i < this.sections.length; i++) {
+          this.sections[i].classList.add('hide-section');
+        }
+      } else if (type == 'projects') {
+        for (var _i = 0; _i < this.projectContainers.length; _i++) {
+          this.projectContainers[_i].classList.add('hide-project');
+        }
+      }
+    }
+  }, {
+    key: "moveToSection",
+    value: function moveToSection(to) {
+      console.log(to);
+      this.sections[this.currentSection].classList.add('hide-section');
+      this.sections[to].classList.remove('hide-section');
+      this.goToSectionAnime(to);
+      this.currentSection = to;
+    }
+  }, {
+    key: "contentAnimations",
+    value: function contentAnimations() {
+      var _this = this;
+
+      document.querySelectorAll('.line-anime').forEach(function (el, i) {
+        el.addEventListener('mouseenter', function () {
+          // if (this.nextAnime) {
+          //     this.nextAnime.kill()
+          // }
+          _this.nextAnime = new _gsap.default.timeline({
+            paused: true
+          });
+
+          _this.nextAnime.fromTo(el.querySelector('.line'), {
+            xPercent: 0
+          }, {
+            xPercent: 100,
+            duration: 0.5
+          });
+
+          _this.nextAnime.fromTo(el.querySelector('.line'), {
+            xPercent: -100
+          }, {
+            xPercent: 0,
+            duration: 0.5
+          });
+
+          _this.nextAnime.play(0);
+        });
+        el.addEventListener('mouseleave', function () {
+          // if (this.nextAnime) {
+          //     this.nextAnime.kill()
+          // }
+          _this.nextAnime = new _gsap.default.timeline({
+            paused: true
+          });
+
+          _this.nextAnime.to(el.querySelector('.line'), {
+            xPercent: 0,
+            duration: 0.6
+          });
+
+          _this.nextAnime.play(0);
+        });
+      });
+    }
+  }, {
+    key: "animateNav",
+    value: function animateNav(i) {
+      var _this2 = this;
+
+      this.animateNavAnime = _gsap.default.timeline({
+        paused: true,
+        onComplete: function onComplete() {
+          _this2.navBtns[i].classList.add('active');
+        }
+      });
+
+      if (i == 0) {
+        this.animateNavAnime.to('.nav-cont', {
+          gridTemplateColumns: this.mobile ? "50% 25% 25%" : "80% 10% 10%"
+        });
+      } else if (i == 1) {
+        this.animateNavAnime.to('.nav-cont', {
+          gridTemplateColumns: this.mobile ? "25% 50% 25%" : "10% 80% 10%"
+        });
+      } else if (i == 2) {
+        this.animateNavAnime.to('.nav-cont', {
+          gridTemplateColumns: this.mobile ? "25% 25% 50%" : "10% 10% 80%"
+        });
+      }
+
+      this.animateNavAnime.play(0);
+    }
+  }, {
+    key: "addEventListeners",
+    value: function addEventListeners() {
+      var _this3 = this;
+
+      this.nextBtns = document.querySelectorAll('.next');
+      this.nextBtns.forEach(function (el, i) {
+        el.addEventListener('click', function () {
+          _this3.moveToSection(i + 1);
+
+          _this3.navBtns.forEach(function (ela) {
+            return ela.classList.remove('active');
+          });
+
+          _this3.animateNav(i + 1);
+        });
+      });
+      document.querySelector('.third > .check').addEventListener('click', function () {
+        console.log(_this3.camera.position, _this3.camera.rotation);
+      });
+      this.navBtns.forEach(function (el, i) {
+        el.addEventListener('click', function () {
+          _this3.navBtns.forEach(function (ela) {
+            return ela.classList.remove('active');
+          });
+
+          _this3.animateNav(i);
+
+          _this3.moveToSection(i);
+        });
+      });
+    }
+  }]);
+
+  return Content;
+}();
+
+exports.Content = Content;
+},{"gsap":"node_modules/gsap/index.js"}],"node_modules/three/examples/jsm/libs/stats.module.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -49408,6 +49818,8 @@ var _Objects = require("./js/Objects");
 
 var _Anime = require("./js/Anime");
 
+var _Content = require("./js/Content");
+
 var _stats = _interopRequireDefault(require("three/examples/jsm/libs/stats.module"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -49434,7 +49846,7 @@ if (mobileDevice) {
 }
 
 var mobile = mobileDevice;
-var orbital = true;
+var orbital = false;
 var shadows = true;
 var noFloor = false;
 var mobileFloor = false;
@@ -49457,8 +49869,8 @@ if (mobile) {
   noBackground = true;
   noFog = false;
   bufferGeo = false;
-  noScreenShader = true;
-  snappingAnime = false;
+  noScreenShader = false;
+  snappingAnime = true;
   stickToCenterAnime = false;
 }
 
@@ -49494,10 +49906,26 @@ var animes = new _Anime.Anime({
   stickToCenterAnime: stickToCenterAnime,
   snappingAnime: snappingAnime,
   videoMaterials: objects.videoMaterial,
-  mobileFloorMesh: objects.mobileFloorMesh
+  mobileFloorMesh: objects.mobileFloorMesh,
+  circularMesh: objects.circularMesh,
+  mirror: objects.mirror,
+  options: {
+    removeProject: function removeProject() {
+      content.removeProject();
+    },
+    showProject: function showProject(num, dir) {
+      content.showProject(num, dir);
+    }
+  }
 });
-var stats = (0, _stats.default)();
-document.body.appendChild(stats.domElement);
+var content = new _Content.Content({
+  camera: threeInstance.camera,
+  mobile: mobile,
+  goToSection: function goToSection(from, to) {
+    animes.goToSection(from, to);
+  }
+});
+var stats = (0, _stats.default)(); // document.body.appendChild(stats.domElement)
 
 var animate = function animate() {
   requestAnimationFrame(animate);
@@ -49511,7 +49939,7 @@ var animate = function animate() {
 };
 
 animate();
-},{"./js/ThreeInit":"js/ThreeInit.js","./js/Objects":"js/Objects.js","./js/Anime":"js/Anime.js","three/examples/jsm/libs/stats.module":"node_modules/three/examples/jsm/libs/stats.module.js"}],"../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./js/ThreeInit":"js/ThreeInit.js","./js/Objects":"js/Objects.js","./js/Anime":"js/Anime.js","./js/Content":"js/Content.js","three/examples/jsm/libs/stats.module":"node_modules/three/examples/jsm/libs/stats.module.js"}],"../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -49539,7 +49967,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "37191" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "43407" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -1,6 +1,7 @@
 import { ThreeInit } from './js/ThreeInit'
 import { Objects } from './js/Objects'
 import { Anime } from './js/Anime'
+import { Content } from './js/Content'
 import Stats from 'three/examples/jsm/libs/stats.module'
 
 
@@ -27,7 +28,7 @@ if (mobileDevice) {
 let mobile = mobileDevice
 
 
-let orbital = true
+let orbital = false
 let shadows = true
 let noFloor = false
 let mobileFloor = false
@@ -52,8 +53,8 @@ if (mobile) {
     noBackground = true
     noFog = false
     bufferGeo = false
-    noScreenShader = true
-    snappingAnime = false
+    noScreenShader = false
+    snappingAnime = true
     stickToCenterAnime = false
 }
 
@@ -80,6 +81,7 @@ const objects = new Objects({
     mobile
 })
 
+
 const animes = new Anime({
     screen: objects.masterMesh,
     scene: threeInstance.scene,
@@ -91,11 +93,30 @@ const animes = new Anime({
     stickToCenterAnime,
     snappingAnime,
     videoMaterials: objects.videoMaterial,
-    mobileFloorMesh: objects.mobileFloorMesh
+    mobileFloorMesh: objects.mobileFloorMesh,
+    circularMesh: objects.circularMesh,
+    mirror: objects.mirror,
+    options: {
+        removeProject: () => {
+            content.removeProject()
+        },
+        showProject: (num, dir) => {
+            content.showProject(num, dir)
+        }
+    }
 })
 
+const content = new Content({
+    camera: threeInstance.camera,
+    mobile,
+    goToSection: (from, to) => {
+        animes.goToSection(from, to)
+    }
+})
+
+
 const stats = Stats()
-document.body.appendChild(stats.domElement)
+// document.body.appendChild(stats.domElement)
 
 const animate = () => {
     requestAnimationFrame(animate);

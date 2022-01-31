@@ -1,0 +1,74 @@
+/** Silence is golden. **/
+
+/**
+  Usage:
+
+  @font-face {
+    font-family: "FontName";
+    font-weight: 400;
+    font-style: normal;
+    font-display: fallback;
+    src: url("./FontName.woff") format("woff"),
+         url("./FontName.woff2") format("woff2");
+  }
+ */
+
+/* Spezia */
+/* @font-face {
+  font-family: "SpeziaSerifTrial";
+  font-weight: 400;
+  font-style: normal;
+  font-display: fallback;
+  src: url("./SpeziaSerifTrial-RegularC.woff") format("woff"),
+        url("./SpeziaSerifTrial-RegularC.woff2") format("woff2");
+} */
+
+@font-face {
+  font-family: "SpeziaSerifTrial";
+  font-weight: 500;
+  font-style: normal;
+  font-display: fallback;
+  src: url("./SpeziaSerifTrial-MediumC.woff") format("woff");
+}
+
+/* @font-face {
+  font-family: "SpeziaSerifTrial";
+  font-weight: 600;
+  font-style: normal;
+  font-display: fallback;
+  src: url("./SpeziaSerifTrial-SemiBold.woff") format("woff");
+} */
+
+/* Spezia Mono */
+@font-face {
+  font-family: "SpeziaMonoTrial";
+  font-weight: 600;
+  font-style: normal;
+  font-display: fallback;
+  src: url("./SpeziaMonoTrial-SemiBold.woff") format("woff");
+}
+
+/* Manrope */
+@font-face {
+  font-family: "Manrope";
+  font-weight: 400;
+  font-style: normal;
+  font-display: fallback;
+  src: url("./Manrope-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Manrope";
+  font-weight: 300;
+  font-style: normal;
+  font-display: fallback;
+  src: url("./Manrope-Light.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Manrope";
+  font-weight: 500;
+  font-style: normal;
+  font-display: fallback;
+  src: url("./Manrope-Medium.woff2") format("woff2");
+}
