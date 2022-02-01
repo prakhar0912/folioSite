@@ -345,22 +345,22 @@ class Anime {
             this.homeAnime.to(this.mainLight, { intensity: 20, duration: timer * 2, })
 
             if (!this.mobile) {
-                this.homeAnime.to('.overlay',
-                    {
-                        opacity: 1,
-                        duration: 1,
-                        duration: timer,
-                        delay: -timer,
-                    }
-                )
-                this.homeAnime.to('.overlay1',
-                    {
-                        opacity: 0,
-                        duration: 1,
-                        duration: timer,
-                        delay: -timer,
-                    }
-                )
+                // this.homeAnime.to('.overlay',
+                //     {
+                //         opacity: 1,
+                //         duration: 1,
+                //         duration: timer,
+                //         delay: -timer,
+                //     }
+                // )
+                // this.homeAnime.to('.overlay1',
+                //     {
+                //         opacity: 0,
+                //         duration: 1,
+                //         duration: timer,
+                //         delay: -timer,
+                //     }
+                // )
             }
 
             this.homeAnime.to(this,
@@ -412,22 +412,22 @@ class Anime {
 
 
             if (!this.mobile) {
-                this.projAnime.to('.overlay',
-                    {
-                        opacity: 0,
-                        duration: 1,
-                        duration: timer,
-                        delay: -timer,
-                    }
-                )
-                this.projAnime.to('.overlay1',
-                    {
-                        opacity: 1,
-                        duration: 1,
-                        duration: timer,
-                        delay: -timer,
-                    }
-                )
+                // this.projAnime.to('.overlay',
+                //     {
+                //         opacity: 0,
+                //         duration: 1,
+                //         duration: timer,
+                //         delay: -timer,
+                //     }
+                // )
+                // this.projAnime.to('.overlay1',
+                //     {
+                //         opacity: 1,
+                //         duration: 1,
+                //         duration: timer,
+                //         delay: -timer,
+                //     }
+                // )
             }
 
 
@@ -491,22 +491,22 @@ class Anime {
             )
 
             if (!this.mobile) {
-                this.aboutAnime.to('.overlay',
-                    {
-                        opacity: 1,
-                        duration: 1,
-                        duration: timer,
-                        delay: -timer,
-                    }
-                )
-                this.aboutAnime.to('.overlay1',
-                    {
-                        opacity: 0,
-                        duration: 1,
-                        duration: timer,
-                        delay: -timer,
-                    }
-                )
+                // this.aboutAnime.to('.overlay',
+                //     {
+                //         opacity: 1,
+                //         duration: 1,
+                //         duration: timer,
+                //         delay: -timer,
+                //     }
+                // )
+                // this.aboutAnime.to('.overlay1',
+                //     {
+                //         opacity: 0,
+                //         duration: 1,
+                //         duration: timer,
+                //         delay: -timer,
+                //     }
+                // )
             }
 
             this.aboutAnime.to(this,
@@ -683,7 +683,7 @@ class Anime {
                 this.camera.position.z = z
                 this.camera.rotation.y = this.totalPi
             },
-            duration: this.mobile ? 1.5 : 0.6
+            duration: this.mobile ? 1 : 0.6
         })
     }
 

@@ -48715,8 +48715,6 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -49106,17 +49104,22 @@ var Anime = /*#__PURE__*/function () {
           duration: timer * 2
         });
 
-        if (!this.mobile) {
-          var _this$homeAnime$to, _this$homeAnime$to2;
-
-          this.homeAnime.to('.overlay', (_this$homeAnime$to = {
-            opacity: 1,
-            duration: 1
-          }, _defineProperty(_this$homeAnime$to, "duration", timer), _defineProperty(_this$homeAnime$to, "delay", -timer), _this$homeAnime$to));
-          this.homeAnime.to('.overlay1', (_this$homeAnime$to2 = {
-            opacity: 0,
-            duration: 1
-          }, _defineProperty(_this$homeAnime$to2, "duration", timer), _defineProperty(_this$homeAnime$to2, "delay", -timer), _this$homeAnime$to2));
+        if (!this.mobile) {// this.homeAnime.to('.overlay',
+          //     {
+          //         opacity: 1,
+          //         duration: 1,
+          //         duration: timer,
+          //         delay: -timer,
+          //     }
+          // )
+          // this.homeAnime.to('.overlay1',
+          //     {
+          //         opacity: 0,
+          //         duration: 1,
+          //         duration: timer,
+          //         delay: -timer,
+          //     }
+          // )
         }
 
         this.homeAnime.to(this, {
@@ -49164,17 +49167,22 @@ var Anime = /*#__PURE__*/function () {
           duration: _timer * 2
         });
 
-        if (!this.mobile) {
-          var _this$projAnime$to, _this$projAnime$to2;
-
-          this.projAnime.to('.overlay', (_this$projAnime$to = {
-            opacity: 0,
-            duration: 1
-          }, _defineProperty(_this$projAnime$to, "duration", _timer), _defineProperty(_this$projAnime$to, "delay", -_timer), _this$projAnime$to));
-          this.projAnime.to('.overlay1', (_this$projAnime$to2 = {
-            opacity: 1,
-            duration: 1
-          }, _defineProperty(_this$projAnime$to2, "duration", _timer), _defineProperty(_this$projAnime$to2, "delay", -_timer), _this$projAnime$to2));
+        if (!this.mobile) {// this.projAnime.to('.overlay',
+          //     {
+          //         opacity: 0,
+          //         duration: 1,
+          //         duration: timer,
+          //         delay: -timer,
+          //     }
+          // )
+          // this.projAnime.to('.overlay1',
+          //     {
+          //         opacity: 1,
+          //         duration: 1,
+          //         duration: timer,
+          //         delay: -timer,
+          //     }
+          // )
         }
 
         this.projAnime.to(this, {
@@ -49223,17 +49231,22 @@ var Anime = /*#__PURE__*/function () {
           duration: _timer2 * 2
         });
 
-        if (!this.mobile) {
-          var _this$aboutAnime$to, _this$aboutAnime$to2;
-
-          this.aboutAnime.to('.overlay', (_this$aboutAnime$to = {
-            opacity: 1,
-            duration: 1
-          }, _defineProperty(_this$aboutAnime$to, "duration", _timer2), _defineProperty(_this$aboutAnime$to, "delay", -_timer2), _this$aboutAnime$to));
-          this.aboutAnime.to('.overlay1', (_this$aboutAnime$to2 = {
-            opacity: 0,
-            duration: 1
-          }, _defineProperty(_this$aboutAnime$to2, "duration", _timer2), _defineProperty(_this$aboutAnime$to2, "delay", -_timer2), _this$aboutAnime$to2));
+        if (!this.mobile) {// this.aboutAnime.to('.overlay',
+          //     {
+          //         opacity: 1,
+          //         duration: 1,
+          //         duration: timer,
+          //         delay: -timer,
+          //     }
+          // )
+          // this.aboutAnime.to('.overlay1',
+          //     {
+          //         opacity: 0,
+          //         duration: 1,
+          //         duration: timer,
+          //         delay: -timer,
+          //     }
+          // )
         }
 
         this.aboutAnime.to(this, {
@@ -49422,7 +49435,7 @@ var Anime = /*#__PURE__*/function () {
           _this5.camera.position.z = z;
           _this5.camera.rotation.y = _this5.totalPi;
         },
-        duration: this.mobile ? 1.5 : 0.6
+        duration: this.mobile ? 1 : 0.6
       });
     }
   }, {
@@ -49530,7 +49543,14 @@ var Content = /*#__PURE__*/function () {
     this.navBtns = document.querySelectorAll('.nav-cont > div');
     this.mobile = mobile;
     this.camera = camera;
+    this.mainPercent = 80;
+
+    if (this.mobile) {
+      this.mainPercent = 50;
+    }
+
     this.currentSection = 0;
+    this.resizeFunc();
     this.addEventListeners();
     this.goToSectionAnime = goToSection;
     this.contentAnimations();
@@ -49631,19 +49651,44 @@ var Content = /*#__PURE__*/function () {
 
       if (i == 0) {
         this.animateNavAnime.to('.nav-cont', {
-          gridTemplateColumns: this.mobile ? "50% 25% 25%" : "80% 10% 10%"
+          gridTemplateColumns: "".concat(this.mainPercent, "% ").concat((100 - this.mainPercent) / 2, "% ").concat((100 - this.mainPercent) / 2, "%")
         });
       } else if (i == 1) {
         this.animateNavAnime.to('.nav-cont', {
-          gridTemplateColumns: this.mobile ? "25% 50% 25%" : "10% 80% 10%"
+          gridTemplateColumns: "".concat((100 - this.mainPercent) / 2, "% ").concat(this.mainPercent, "% ").concat((100 - this.mainPercent) / 2, "%")
         });
       } else if (i == 2) {
         this.animateNavAnime.to('.nav-cont', {
-          gridTemplateColumns: this.mobile ? "25% 25% 50%" : "10% 10% 80%"
+          gridTemplateColumns: "".concat((100 - this.mainPercent) / 2, "% ").concat((100 - this.mainPercent) / 2, "% ").concat(this.mainPercent, "%")
         });
       }
 
       this.animateNavAnime.play(0);
+    }
+  }, {
+    key: "resizeFunc",
+    value: function resizeFunc() {
+      if (this.mobile) {
+        if (this.mainPercent != 50) {
+          this.mainPercent = 50;
+          this.animateNav(this.currentSection);
+        }
+      } else {
+        if (window.innerWidth < 1450 && this.mainPercent != 70) {
+          this.mainPercent = 70;
+          this.animateNav(this.currentSection);
+        }
+
+        if (window.innerWidth < 990 && this.mainPercent != 65) {
+          this.mainPercent = 65;
+          this.animateNav(this.currentSection);
+        }
+
+        if (window.innerWidth > 1450 && this.mainPercent != 80) {
+          this.mainPercent = 80;
+          this.animateNav(this.currentSection);
+        }
+      }
     }
   }, {
     key: "addEventListeners",
@@ -49676,6 +49721,7 @@ var Content = /*#__PURE__*/function () {
           _this3.moveToSection(i);
         });
       });
+      window.addEventListener('resize', this.resizeFunc.bind(this));
     }
   }]);
 
@@ -49870,7 +49916,7 @@ if (mobile) {
   noFog = false;
   bufferGeo = false;
   noScreenShader = false;
-  snappingAnime = true;
+  snappingAnime = false;
   stickToCenterAnime = false;
 }
 
@@ -49925,7 +49971,8 @@ var content = new _Content.Content({
     animes.goToSection(from, to);
   }
 });
-var stats = (0, _stats.default)(); // document.body.appendChild(stats.domElement)
+var stats = (0, _stats.default)();
+document.body.appendChild(stats.domElement);
 
 var animate = function animate() {
   requestAnimationFrame(animate);
@@ -49967,7 +50014,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "43407" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "38555" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

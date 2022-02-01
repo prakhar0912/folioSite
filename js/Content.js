@@ -9,11 +9,17 @@ class Content {
         this.navBtns = document.querySelectorAll('.nav-cont > div')
         this.mobile = mobile
         this.camera = camera
+        this.mainPercent = 80
+        if(this.mobile){
+            this.mainPercent = 50
+        }
         this.currentSection = 0
+        this.resizeFunc()
         this.addEventListeners()
         this.goToSectionAnime = goToSection
         this.contentAnimations()
         this.animateNav(0)
+
     }
 
     removeProject() {
@@ -103,7 +109,7 @@ class Content {
         if (i == 0) {
             this.animateNavAnime.to('.nav-cont',
                 {
-                    gridTemplateColumns: this.mobile ? "50% 25% 25%" : "80% 10% 10%",
+                    gridTemplateColumns: `${this.mainPercent}% ${(100-this.mainPercent)/2}% ${(100-this.mainPercent)/2}%`,
                     
                 },
             )
@@ -111,18 +117,42 @@ class Content {
         else if (i == 1) {
             this.animateNavAnime.to('.nav-cont',
                 {
-                    gridTemplateColumns: this.mobile ? "25% 50% 25%" : "10% 80% 10%"
+                    gridTemplateColumns: `${(100-this.mainPercent)/2}% ${this.mainPercent}% ${(100-this.mainPercent)/2}%`
                 }
             )
         }
         else if (i == 2) {
             this.animateNavAnime.to('.nav-cont',
                 {
-                    gridTemplateColumns: this.mobile ? "25% 25% 50%" : "10% 10% 80%"
+                    gridTemplateColumns: `${(100-this.mainPercent)/2}% ${(100-this.mainPercent)/2}% ${this.mainPercent}%`
                 }
             )
         }
         this.animateNavAnime.play(0)
+    }
+
+    resizeFunc(){
+        if(this.mobile){
+            if(this.mainPercent != 50){
+                this.mainPercent = 50
+                this.animateNav(this.currentSection)
+            }
+        }
+        else{
+            if(window.innerWidth < 1450 && this.mainPercent != 70){
+                this.mainPercent = 70
+                this.animateNav(this.currentSection)
+            }
+            if(window.innerWidth < 990 && this.mainPercent != 65){
+                this.mainPercent = 65
+                this.animateNav(this.currentSection)
+            }
+            if(window.innerWidth > 1450 && this.mainPercent != 80){
+                this.mainPercent = 80
+                this.animateNav(this.currentSection)
+            }
+        }
+        
     }
 
 
@@ -146,6 +176,8 @@ class Content {
                 this.moveToSection(i)
             })
         })
+
+        window.addEventListener('resize', this.resizeFunc.bind(this))
     }
 
 }

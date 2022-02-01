@@ -54,7 +54,7 @@ if (mobile) {
     noFog = false
     bufferGeo = false
     noScreenShader = false
-    snappingAnime = true
+    snappingAnime = false
     stickToCenterAnime = false
 }
 
@@ -116,7 +116,7 @@ const content = new Content({
 
 
 const stats = Stats()
-// document.body.appendChild(stats.domElement)
+document.body.appendChild(stats.domElement)
 
 const animate = () => {
     requestAnimationFrame(animate);
