@@ -58,6 +58,7 @@ class Anime {
         }
 
         this.snapOffset = this.stickToCenterAnime ? 0.4 : 0.5
+        this.snapOffset = this.mobile ? 0.2 : this.snapOffset
         this.snapTo = 1
         this.snapToAnime = null
         this.currentSection = 0
@@ -70,9 +71,12 @@ class Anime {
         this.currentLookAt = new THREE.Vector3(2, 0, -2)
         this.videoMaterials = videoMaterials
         this.totalPi = Math.PI / 4
-        if (!this.mobile) {
-            this.cameraShake()
-        }
+        this.newMouseDown = false
+        this.oldPi = 0
+        // if (!this.mobile) {
+        // }
+        this.cameraShake()
+
         this.rotInf()
 
     }
@@ -161,7 +165,7 @@ class Anime {
         this.randomRotation = setInterval(() => {
             this.rotateTo(this.randomRotNum)
             this.randomRotNum++
-            if(this.randomRotNum > 3){
+            if (this.randomRotNum > 3) {
                 this.randomRotNum = 0
             }
         }, 5000)
@@ -596,6 +600,8 @@ class Anime {
     }
 
     cameraShake() {
+        this.raycaster = new THREE.Raycaster()
+        this.pointer = new THREE.Vector2()
         this.mouse = new THREE.Vector2();
         this.target = new THREE.Vector2();
         this.final = new THREE.Vector2()
@@ -604,10 +610,20 @@ class Anime {
         this.windowHalf = new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2);
         this.mouse.x = (this.windowHalf.x);
         this.mouse.y = (this.windowHalf.y);
-        document.addEventListener('mousemove', this.onMouseMove.bind(this), false);
-        document.addEventListener('wheel', this.onMouseWheel.bind(this), false);
-        document.addEventListener('keypress', this.onKeyPress.bind(this), false);
-        window.addEventListener("resize", this.resize.bind(this));
+        // document.addEventListener('mousemove', this.onMouseMove.bind(this), false);
+        window.addEventListener(this.mobile ? 'touchstart' : 'mousedown', (event) => {
+            this.pointer.x = ((this.mobile ? event.touches[0].clientX : event.clientX) / window.innerWidth) * 2 - 1;
+            this.pointer.y = - ((this.mobile ? event.touches[0].clientY : event.clientY) / window.innerHeight) * 2 + 1;
+            this.newMouseDown = true
+        })
+        window.addEventListener(this.mobile ? 'touchmove' : 'mousemove', (event) => {
+            this.pointer.x = ((this.mobile ? event.touches[0].clientX : event.clientX) / window.innerWidth) * 2 - 1;
+            this.pointer.y = - ((this.mobile ? event.touches[0].clientY : event.clientY) / window.innerHeight) * 2 + 1;
+            this.newMouseDown = false
+        })
+        // document.addEventListener('wheel', this.onMouseWheel.bind(this), false);
+        // document.addEventListener('keypress', this.onKeyPress.bind(this), false);
+        // window.addEventListener("resize", this.resize.bind(this));
     }
 
     resize() {
@@ -615,6 +631,8 @@ class Anime {
     }
 
     onMouseMove(event) {
+        this.pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+        this.pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
         this.mouse.x = (event.clientX - this.windowHalf.x);
         this.mouse.y = (event.clientY - this.windowHalf.x);
     }
@@ -650,7 +668,7 @@ class Anime {
         this.timeDelta = this.time - this.oldTime
         this.speed = (this.dx / this.timeDelta) * 10
         if (this.mobile) {
-            this.speed *= 2
+            this.speed *= 1.5
             if (Math.abs(this.speed) < 20) {
                 this.speed *= 3.6
             }
@@ -668,11 +686,16 @@ class Anime {
     }
 
     moveToScreen(pi) {
+        let dur = false
+
+        if (Math.abs(pi) < 0.7) {
+            dur = true
+        }
         if (this.moveScreenAnime) {
             this.moveScreenAnime.kill()
         }
 
-        // console.log(this.totalPi + pi)
+
 
         this.moveScreenAnime = gsap.to(this, {
             totalPi: this.totalPi + pi,
@@ -683,8 +706,9 @@ class Anime {
                 this.camera.position.z = z
                 this.camera.rotation.y = this.totalPi
             },
-            duration: this.mobile ? 1 : 0.6
+            duration: this.mobile ? dur ? 1.3 : 1 : 0.6
         })
+        // this.oldPi = pi
     }
 
     tiltCam() {
@@ -717,6 +741,22 @@ class Anime {
         gsap.to(this.camera.rotation, { x: this.final.x + this.offset.x, y: this.final.y + this.offset.y, duration: 0.001 })
     }
 
+    rayFunc() {
+        // update the picking ray with the camera and pointer position
+        this.raycaster.setFromCamera(this.pointer, this.camera);
+
+        // calculate objects intersecting the picking ray
+        const intersects = this.raycaster.intersectObjects(this.scene.children);
+
+        for (let i = 0; i < intersects.length; i++) {
+            if (intersects[i].object.name == 'screen') {
+                this.options.changeSection(1)
+                this.goToSection(1)
+                return
+            }
+        }
+    }
+
     animate() {
         this.time = Date.now()
         if (!this.stopAnime && !this.mobile) {
@@ -735,6 +775,9 @@ class Anime {
             if (this.mouseDown && !this.stopTilt) {
                 this.moveScreen()
             }
+        }
+        if (this.currentSection == 0 && this.newMouseDown) {
+            this.rayFunc()
         }
         this.oldTime = this.time
         this.dx = 0

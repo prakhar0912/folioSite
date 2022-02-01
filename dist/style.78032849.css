@@ -131,6 +131,10 @@ body {
     display: none;
 } */
 
+.idk > div{
+    overflow: hidden;
+}
+
 h2 {
     font-family: "Manrope";
     font-weight: 300;
@@ -247,15 +251,13 @@ h2 {
 .socials {
     position: relative;
     max-width: 50%;
-    display: grid;
-    grid-template-columns: repeat(3, auto);
-    align-items: center;
-    justify-items: right;
+    display: flex;
     width: max-content;
     margin-left: auto;
-    margin-right: 50px;
+    margin-right: 20px;
     font-family: Manrope, Helvetica, sans-serif;
     z-index: 3;
+    transition: all 1s ease-out;
 }
 
 .socials>div {
@@ -276,13 +278,20 @@ h2 {
     opacity: 1;
 }
 
-.socials>div>p {
+.socials > div > div{
+    position: relative;
+    overflow-x: hidden;
+    margin-right: 15px;
+}
+
+.socials > div > div > p {
     margin: 0;
-    margin-left: 15px;
+    padding: 0;
+    display: block;
+    width: 0;
 }
 
 .socials>div>img {
-    /* height: 20px; */
     width: 20px;
 }
 
@@ -368,8 +377,8 @@ h2 {
     h2 {
         font-family: "Manrope";
         font-weight: 200;
-        font-size: 1.2rem;
-        margin: 5px 0;
+        font-size: 1.1rem;
+        margin: 0px 0;
         /* background: rgba(86, 7, 133, 0.788); */
         max-width: max-content;
         padding: 3px 0;
@@ -380,7 +389,7 @@ h2 {
         font-weight: 500;
         font-size: 0.8rem;
         margin: 15px 0px;
-        margin-top: 50px;
+        margin-top: 30px;
         color: var(--next-link-color);
         border: none;
         background-color: transparent;
@@ -423,8 +432,10 @@ h2 {
     }
 
     .project-container{
-        box-shadow: none;
-        background-color: transparent;
+        /* box-shadow: none;
+        background-color: transparent; */
+        padding: 20px;
+        margin-left: 20px;
     }
 
     .socials {

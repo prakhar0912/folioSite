@@ -27,7 +27,6 @@ if (mobileDevice) {
 
 let mobile = mobileDevice
 
-
 let orbital = false
 let shadows = true
 let noFloor = false
@@ -102,6 +101,10 @@ const animes = new Anime({
         },
         showProject: (num, dir) => {
             content.showProject(num, dir)
+        },
+        changeSection: (sec) => {
+            content.navClick(sec)
+            // content.moveToSection(sec)
         }
     }
 })

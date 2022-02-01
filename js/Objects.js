@@ -362,6 +362,7 @@ class Objects {
         let material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
         let mesh = new THREE.Mesh(geometry, material);
         mesh.position.y = 0.05
+        mesh.name = 'screen'
         this.videoMaterial.push(material)
         this.masterMesh.add(mesh)
 
@@ -374,6 +375,7 @@ class Objects {
         material = new THREE.MeshBasicMaterial({ color: 0x000000 });
         mesh = new THREE.Mesh(geometry, material);
         mesh.position.y = 0.05
+        mesh.name = 'screen'
         this.masterMesh.add(mesh)
     }
 

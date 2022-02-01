@@ -42920,6 +42920,7 @@ var Objects = /*#__PURE__*/function () {
       });
       var mesh = new THREE.Mesh(geometry, material);
       mesh.position.y = 0.05;
+      mesh.name = 'screen';
       this.videoMaterial.push(material);
       this.masterMesh.add(mesh);
 
@@ -42934,6 +42935,7 @@ var Objects = /*#__PURE__*/function () {
       });
       mesh = new THREE.Mesh(geometry, material);
       mesh.position.y = 0.05;
+      mesh.name = 'screen';
       this.masterMesh.add(mesh);
     }
   }, {
@@ -48780,6 +48782,7 @@ var Anime = /*#__PURE__*/function () {
       green: 0
     };
     this.snapOffset = this.stickToCenterAnime ? 0.4 : 0.5;
+    this.snapOffset = this.mobile ? 0.2 : this.snapOffset;
     this.snapTo = 1;
     this.snapToAnime = null;
     this.currentSection = 0;
@@ -48792,11 +48795,11 @@ var Anime = /*#__PURE__*/function () {
     this.currentLookAt = new THREE.Vector3(2, 0, -2);
     this.videoMaterials = videoMaterials;
     this.totalPi = Math.PI / 4;
+    this.newMouseDown = false;
+    this.oldPi = 0; // if (!this.mobile) {
+    // }
 
-    if (!this.mobile) {
-      this.cameraShake();
-    }
-
+    this.cameraShake();
     this.rotInf();
   }
 
@@ -49328,6 +49331,10 @@ var Anime = /*#__PURE__*/function () {
   }, {
     key: "cameraShake",
     value: function cameraShake() {
+      var _this5 = this;
+
+      this.raycaster = new THREE.Raycaster();
+      this.pointer = new THREE.Vector2();
       this.mouse = new THREE.Vector2();
       this.target = new THREE.Vector2();
       this.final = new THREE.Vector2();
@@ -49335,11 +49342,20 @@ var Anime = /*#__PURE__*/function () {
       this.final.y = this.camera.rotation.y;
       this.windowHalf = new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2);
       this.mouse.x = this.windowHalf.x;
-      this.mouse.y = this.windowHalf.y;
-      document.addEventListener('mousemove', this.onMouseMove.bind(this), false);
-      document.addEventListener('wheel', this.onMouseWheel.bind(this), false);
-      document.addEventListener('keypress', this.onKeyPress.bind(this), false);
-      window.addEventListener("resize", this.resize.bind(this));
+      this.mouse.y = this.windowHalf.y; // document.addEventListener('mousemove', this.onMouseMove.bind(this), false);
+
+      window.addEventListener(this.mobile ? 'touchstart' : 'mousedown', function (event) {
+        _this5.pointer.x = (_this5.mobile ? event.touches[0].clientX : event.clientX) / window.innerWidth * 2 - 1;
+        _this5.pointer.y = -((_this5.mobile ? event.touches[0].clientY : event.clientY) / window.innerHeight) * 2 + 1;
+        _this5.newMouseDown = true;
+      });
+      window.addEventListener(this.mobile ? 'touchmove' : 'mousemove', function (event) {
+        _this5.pointer.x = (_this5.mobile ? event.touches[0].clientX : event.clientX) / window.innerWidth * 2 - 1;
+        _this5.pointer.y = -((_this5.mobile ? event.touches[0].clientY : event.clientY) / window.innerHeight) * 2 + 1;
+        _this5.newMouseDown = false;
+      }); // document.addEventListener('wheel', this.onMouseWheel.bind(this), false);
+      // document.addEventListener('keypress', this.onKeyPress.bind(this), false);
+      // window.addEventListener("resize", this.resize.bind(this));
     }
   }, {
     key: "resize",
@@ -49349,6 +49365,8 @@ var Anime = /*#__PURE__*/function () {
   }, {
     key: "onMouseMove",
     value: function onMouseMove(event) {
+      this.pointer.x = event.clientX / window.innerWidth * 2 - 1;
+      this.pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
       this.mouse.x = event.clientX - this.windowHalf.x;
       this.mouse.y = event.clientY - this.windowHalf.x;
     }
@@ -49396,7 +49414,7 @@ var Anime = /*#__PURE__*/function () {
       this.speed = this.dx / this.timeDelta * 10;
 
       if (this.mobile) {
-        this.speed *= 2;
+        this.speed *= 1.5;
 
         if (Math.abs(this.speed) < 20) {
           this.speed *= 3.6;
@@ -49419,24 +49437,29 @@ var Anime = /*#__PURE__*/function () {
   }, {
     key: "moveToScreen",
     value: function moveToScreen(pi) {
-      var _this5 = this;
+      var _this6 = this;
+
+      var dur = false;
+
+      if (Math.abs(pi) < 0.7) {
+        dur = true;
+      }
 
       if (this.moveScreenAnime) {
         this.moveScreenAnime.kill();
-      } // console.log(this.totalPi + pi)
-
+      }
 
       this.moveScreenAnime = _gsap.default.to(this, {
         totalPi: this.totalPi + pi,
         onUpdate: function onUpdate() {
-          var z = Math.cos(_this5.totalPi) * _this5.radius - 2;
-          var x = Math.sin(_this5.totalPi) * _this5.radius - 4;
-          _this5.camera.position.x = x;
-          _this5.camera.position.z = z;
-          _this5.camera.rotation.y = _this5.totalPi;
+          var z = Math.cos(_this6.totalPi) * _this6.radius - 2;
+          var x = Math.sin(_this6.totalPi) * _this6.radius - 4;
+          _this6.camera.position.x = x;
+          _this6.camera.position.z = z;
+          _this6.camera.rotation.y = _this6.totalPi;
         },
-        duration: this.mobile ? 1 : 0.6
-      });
+        duration: this.mobile ? dur ? 1.3 : 1 : 0.6
+      }); // this.oldPi = pi
     }
   }, {
     key: "tiltCam",
@@ -49476,6 +49499,22 @@ var Anime = /*#__PURE__*/function () {
       });
     }
   }, {
+    key: "rayFunc",
+    value: function rayFunc() {
+      // update the picking ray with the camera and pointer position
+      this.raycaster.setFromCamera(this.pointer, this.camera); // calculate objects intersecting the picking ray
+
+      var intersects = this.raycaster.intersectObjects(this.scene.children);
+
+      for (var i = 0; i < intersects.length; i++) {
+        if (intersects[i].object.name == 'screen') {
+          this.options.changeSection(1);
+          this.goToSection(1);
+          return;
+        }
+      }
+    }
+  }, {
     key: "animate",
     value: function animate() {
       this.time = Date.now();
@@ -49500,6 +49539,10 @@ var Anime = /*#__PURE__*/function () {
         if (this.mouseDown && !this.stopTilt) {
           this.moveScreen();
         }
+      }
+
+      if (this.currentSection == 0 && this.newMouseDown) {
+        this.rayFunc();
       }
 
       this.oldTime = this.time;
@@ -49541,6 +49584,7 @@ var Content = /*#__PURE__*/function () {
     this.sections = document.querySelectorAll(".content > div");
     this.projectContainers = document.querySelectorAll(".second > div");
     this.navBtns = document.querySelectorAll('.nav-cont > div');
+    this.socialsBtns = document.querySelectorAll('.socials > div');
     this.mobile = mobile;
     this.camera = camera;
     this.mainPercent = 80;
@@ -49566,6 +49610,7 @@ var Content = /*#__PURE__*/function () {
     value: function showProject(num, dir) {
       console.log(num, dir);
       this.hideAll('projects');
+      this.animateSection(num, dir);
       this.projectContainers[num].classList.remove('hide-project');
     }
   }, {
@@ -49582,6 +49627,19 @@ var Content = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "animateSection",
+    value: function animateSection(sec, dir) {
+      this.projectContainers[sec].querySelectorAll('.idk > div > h2').forEach(function (el, i) {
+        _gsap.default.fromTo(el, {
+          yPercent: dir == 'f' ? 100 : -100
+        }, {
+          yPercent: 0,
+          delay: i * 0.05
+        });
+      });
+      this.lineAnimeStart(this.projectContainers[sec].querySelector('.line-anime'), dir);
+    }
+  }, {
     key: "moveToSection",
     value: function moveToSection(to) {
       console.log(to);
@@ -49589,6 +49647,39 @@ var Content = /*#__PURE__*/function () {
       this.sections[to].classList.remove('hide-section');
       this.goToSectionAnime(to);
       this.currentSection = to;
+    }
+  }, {
+    key: "lineAnimeStart",
+    value: function lineAnimeStart(el) {
+      var dir = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'b';
+      this.nextAnime = new _gsap.default.timeline({
+        paused: true
+      });
+      this.nextAnime.fromTo(el.querySelector('.line'), {
+        xPercent: 0
+      }, {
+        xPercent: dir == 'b' ? -100 : 100,
+        duration: 0.5
+      });
+      this.nextAnime.fromTo(el.querySelector('.line'), {
+        xPercent: dir == 'b' ? 100 : -100
+      }, {
+        xPercent: 0,
+        duration: 0.5
+      });
+      this.nextAnime.play(0);
+    }
+  }, {
+    key: "lineAnimeEnd",
+    value: function lineAnimeEnd(el) {
+      this.nextAnime = new _gsap.default.timeline({
+        paused: true
+      });
+      this.nextAnime.to(el.querySelector('.line'), {
+        xPercent: 0,
+        duration: 0.6
+      });
+      this.nextAnime.play(0);
     }
   }, {
     key: "contentAnimations",
@@ -49600,41 +49691,13 @@ var Content = /*#__PURE__*/function () {
           // if (this.nextAnime) {
           //     this.nextAnime.kill()
           // }
-          _this.nextAnime = new _gsap.default.timeline({
-            paused: true
-          });
-
-          _this.nextAnime.fromTo(el.querySelector('.line'), {
-            xPercent: 0
-          }, {
-            xPercent: 100,
-            duration: 0.5
-          });
-
-          _this.nextAnime.fromTo(el.querySelector('.line'), {
-            xPercent: -100
-          }, {
-            xPercent: 0,
-            duration: 0.5
-          });
-
-          _this.nextAnime.play(0);
-        });
-        el.addEventListener('mouseleave', function () {
-          // if (this.nextAnime) {
-          //     this.nextAnime.kill()
-          // }
-          _this.nextAnime = new _gsap.default.timeline({
-            paused: true
-          });
-
-          _this.nextAnime.to(el.querySelector('.line'), {
-            xPercent: 0,
-            duration: 0.6
-          });
-
-          _this.nextAnime.play(0);
-        });
+          _this.lineAnimeStart(el, 'f');
+        }); // el.addEventListener('mouseleave', () => {
+        //     // if (this.nextAnime) {
+        //     //     this.nextAnime.kill()
+        //     // }
+        //     this.lineAnimeEnd(el)
+        // })
       });
     }
   }, {
@@ -49691,6 +49754,30 @@ var Content = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "socialOpen",
+    value: function socialOpen(btn) {
+      _gsap.default.to(btn.querySelector('div > p'), {
+        width: "auto"
+      });
+    }
+  }, {
+    key: "socialClose",
+    value: function socialClose(btn) {
+      _gsap.default.to(btn.querySelector('div > p'), {
+        width: 0,
+        delay: 0.5
+      });
+    }
+  }, {
+    key: "navClick",
+    value: function navClick(i) {
+      this.navBtns.forEach(function (ela) {
+        return ela.classList.remove('active');
+      });
+      this.animateNav(i);
+      this.moveToSection(i);
+    }
+  }, {
     key: "addEventListeners",
     value: function addEventListeners() {
       var _this3 = this;
@@ -49712,16 +49799,18 @@ var Content = /*#__PURE__*/function () {
       });
       this.navBtns.forEach(function (el, i) {
         el.addEventListener('click', function () {
-          _this3.navBtns.forEach(function (ela) {
-            return ela.classList.remove('active');
-          });
-
-          _this3.animateNav(i);
-
-          _this3.moveToSection(i);
+          _this3.navClick(i);
         });
       });
       window.addEventListener('resize', this.resizeFunc.bind(this));
+      this.socialsBtns.forEach(function (e) {
+        e.addEventListener('mouseenter', function () {
+          _this3.socialOpen(e);
+        });
+        e.addEventListener('mouseleave', function () {
+          _this3.socialClose(e);
+        });
+      });
     }
   }]);
 
@@ -49961,6 +50050,9 @@ var animes = new _Anime.Anime({
     },
     showProject: function showProject(num, dir) {
       content.showProject(num, dir);
+    },
+    changeSection: function changeSection(sec) {
+      content.navClick(sec); // content.moveToSection(sec)
     }
   }
 });

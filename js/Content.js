@@ -7,10 +7,11 @@ class Content {
         this.sections = document.querySelectorAll(".content > div")
         this.projectContainers = document.querySelectorAll(".second > div")
         this.navBtns = document.querySelectorAll('.nav-cont > div')
+        this.socialsBtns = document.querySelectorAll('.socials > div')
         this.mobile = mobile
         this.camera = camera
         this.mainPercent = 80
-        if(this.mobile){
+        if (this.mobile) {
             this.mainPercent = 50
         }
         this.currentSection = 0
@@ -29,6 +30,7 @@ class Content {
     showProject(num, dir) {
         console.log(num, dir)
         this.hideAll('projects')
+        this.animateSection(num, dir)
         this.projectContainers[num].classList.remove('hide-project')
     }
 
@@ -47,6 +49,22 @@ class Content {
 
     }
 
+    animateSection(sec, dir) {
+        this.projectContainers[sec].querySelectorAll('.idk > div > h2').forEach((el, i) => {
+            gsap.fromTo(el,
+                {
+                    yPercent: dir == 'f' ? 100 : -100
+                },
+                {
+                    yPercent: 0,
+                    delay: (i) * 0.05
+                }
+            )
+        })
+        this.lineAnimeStart(this.projectContainers[sec].querySelector('.line-anime'), dir)
+
+    }
+
     moveToSection(to) {
         console.log(to)
         this.sections[this.currentSection].classList.add('hide-section')
@@ -55,48 +73,58 @@ class Content {
         this.currentSection = to
     }
 
+    lineAnimeStart(el, dir = 'b') {
+        this.nextAnime = new gsap.timeline({ paused: true })
+
+        this.nextAnime.fromTo(el.querySelector('.line'),
+            {
+                xPercent: 0
+            },
+            {
+                xPercent: dir == 'b' ? -100 : 100,
+                duration: 0.5
+            },
+        )
+        this.nextAnime.fromTo(el.querySelector('.line'),
+            {
+                xPercent: dir == 'b' ? 100 : -100
+            },
+            {
+                xPercent: 0,
+                duration: 0.5
+            },
+        )
+        this.nextAnime.play(0)
+    }
+
+    lineAnimeEnd(el) {
+        this.nextAnime = new gsap.timeline({ paused: true })
+        this.nextAnime.to(el.querySelector('.line'),
+            {
+                xPercent: 0,
+                duration: 0.6
+            },
+        )
+        this.nextAnime.play(0)
+    }
+
     contentAnimations() {
         document.querySelectorAll('.line-anime').forEach((el, i) => {
             el.addEventListener('mouseenter', () => {
                 // if (this.nextAnime) {
                 //     this.nextAnime.kill()
                 // }
-                this.nextAnime = new gsap.timeline({ paused: true })
-
-                this.nextAnime.fromTo(el.querySelector('.line'),
-                    {
-                        xPercent: 0
-                    },
-                    {
-                        xPercent: 100,
-                        duration: 0.5
-                    },
-                )
-                this.nextAnime.fromTo(el.querySelector('.line'),
-                    {
-                        xPercent: -100
-                    },
-                    {
-                        xPercent: 0,
-                        duration: 0.5
-                    },
-                )
-                this.nextAnime.play(0)
+                this.lineAnimeStart(el, 'f')
             })
-            el.addEventListener('mouseleave', () => {
-                // if (this.nextAnime) {
-                //     this.nextAnime.kill()
-                // }
-                this.nextAnime = new gsap.timeline({ paused: true })
-                this.nextAnime.to(el.querySelector('.line'),
-                    {
-                        xPercent: 0,
-                        duration: 0.6
-                    },
-                )
-                this.nextAnime.play(0)
-            })
+            // el.addEventListener('mouseleave', () => {
+            //     // if (this.nextAnime) {
+            //     //     this.nextAnime.kill()
+            //     // }
+            //     this.lineAnimeEnd(el)
+            // })
         })
+
+
     }
 
     animateNav(i) {
@@ -109,50 +137,64 @@ class Content {
         if (i == 0) {
             this.animateNavAnime.to('.nav-cont',
                 {
-                    gridTemplateColumns: `${this.mainPercent}% ${(100-this.mainPercent)/2}% ${(100-this.mainPercent)/2}%`,
-                    
+                    gridTemplateColumns: `${this.mainPercent}% ${(100 - this.mainPercent) / 2}% ${(100 - this.mainPercent) / 2}%`,
+
                 },
             )
         }
         else if (i == 1) {
             this.animateNavAnime.to('.nav-cont',
                 {
-                    gridTemplateColumns: `${(100-this.mainPercent)/2}% ${this.mainPercent}% ${(100-this.mainPercent)/2}%`
+                    gridTemplateColumns: `${(100 - this.mainPercent) / 2}% ${this.mainPercent}% ${(100 - this.mainPercent) / 2}%`
                 }
             )
         }
         else if (i == 2) {
             this.animateNavAnime.to('.nav-cont',
                 {
-                    gridTemplateColumns: `${(100-this.mainPercent)/2}% ${(100-this.mainPercent)/2}% ${this.mainPercent}%`
+                    gridTemplateColumns: `${(100 - this.mainPercent) / 2}% ${(100 - this.mainPercent) / 2}% ${this.mainPercent}%`
                 }
             )
         }
         this.animateNavAnime.play(0)
     }
 
-    resizeFunc(){
-        if(this.mobile){
-            if(this.mainPercent != 50){
+    resizeFunc() {
+        if (this.mobile) {
+            if (this.mainPercent != 50) {
                 this.mainPercent = 50
                 this.animateNav(this.currentSection)
             }
         }
-        else{
-            if(window.innerWidth < 1450 && this.mainPercent != 70){
+        else {
+            if (window.innerWidth < 1450 && this.mainPercent != 70) {
                 this.mainPercent = 70
                 this.animateNav(this.currentSection)
             }
-            if(window.innerWidth < 990 && this.mainPercent != 65){
+            if (window.innerWidth < 990 && this.mainPercent != 65) {
                 this.mainPercent = 65
                 this.animateNav(this.currentSection)
             }
-            if(window.innerWidth > 1450 && this.mainPercent != 80){
+            if (window.innerWidth > 1450 && this.mainPercent != 80) {
                 this.mainPercent = 80
                 this.animateNav(this.currentSection)
             }
         }
-        
+
+    }
+
+    socialOpen(btn) {
+        gsap.to(btn.querySelector('div > p'), { width: "auto" })
+    }
+
+    socialClose(btn) {
+        gsap.to(btn.querySelector('div > p'), { width: 0, delay: 0.5 })
+    }
+
+    navClick(i) {
+        this.navBtns.forEach(ela => ela.classList.remove('active'))
+        this.animateNav(i)
+        this.moveToSection(i)
     }
 
 
@@ -171,13 +213,20 @@ class Content {
 
         this.navBtns.forEach((el, i) => {
             el.addEventListener('click', () => {
-                this.navBtns.forEach(ela => ela.classList.remove('active'))
-                this.animateNav(i)
-                this.moveToSection(i)
+                this.navClick(i)
             })
         })
 
         window.addEventListener('resize', this.resizeFunc.bind(this))
+
+        this.socialsBtns.forEach(e => {
+            e.addEventListener('mouseenter', () => {
+                this.socialOpen(e)
+            })
+            e.addEventListener('mouseleave', () => {
+                this.socialClose(e)
+            })
+        })
     }
 
 }
