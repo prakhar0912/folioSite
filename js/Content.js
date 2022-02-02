@@ -66,11 +66,21 @@ class Content {
     }
 
     moveToSection(to) {
-        console.log(to)
         this.sections[this.currentSection].classList.add('hide-section')
-        this.sections[to].classList.remove('hide-section')
         this.goToSectionAnime(to)
         this.currentSection = to
+    }
+
+    showSection(sec){
+        gsap.fromTo(this.sections[sec], 
+            {
+                opacity: 0,
+            },
+            {
+                opacity: 1,
+            }    
+        )
+        this.sections[sec].classList.remove('hide-section')
     }
 
     lineAnimeStart(el, dir = 'b') {
@@ -202,13 +212,8 @@ class Content {
         this.nextBtns = document.querySelectorAll('.next')
         this.nextBtns.forEach((el, i) => {
             el.addEventListener('click', () => {
-                this.moveToSection(i + 1)
-                this.navBtns.forEach(ela => ela.classList.remove('active'))
-                this.animateNav(i + 1)
+                this.navClick(i + 1)
             })
-        })
-        document.querySelector('.third > .check').addEventListener('click', () => {
-            console.log(this.camera.position, this.camera.rotation)
         })
 
         this.navBtns.forEach((el, i) => {
@@ -219,14 +224,17 @@ class Content {
 
         window.addEventListener('resize', this.resizeFunc.bind(this))
 
-        this.socialsBtns.forEach(e => {
-            e.addEventListener('mouseenter', () => {
-                this.socialOpen(e)
+
+        if(!this.mobile){
+            this.socialsBtns.forEach(e => {
+                e.addEventListener('mouseenter', () => {
+                    this.socialOpen(e)
+                })
+                e.addEventListener('mouseleave', () => {
+                    this.socialClose(e)
+                })
             })
-            e.addEventListener('mouseleave', () => {
-                this.socialClose(e)
-            })
-        })
+        }
     }
 
 }

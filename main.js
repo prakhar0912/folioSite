@@ -105,6 +105,9 @@ const animes = new Anime({
         changeSection: (sec) => {
             content.navClick(sec)
             // content.moveToSection(sec)
+        },
+        finishSectionChange: (sec) => {
+            content.showSection(sec)
         }
     }
 })

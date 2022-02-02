@@ -24,21 +24,27 @@ class Anime {
         if (!this.mobile) {
             this.mirror = mirror
         }
-        this.stopAnime = true
-        this.offset = new THREE.Vector2()
-        this.positionOffset = new THREE.Vector3()
-        this.positionOffset.z = 5.5
+
+        this.offset = new THREE.Vector3()
         this.offset.x = -0.6132813005274419
         this.offset.y = 0.3006405553572554
-        this.offset.z = 0.20548036184093635
-        this.rot = false
+        this.offset.z = 0.25548036184093635
+
+        this.sectionMap = [
+            { start: false, end: false, current: true },
+            { start: false, end: false, current: false },
+            { start: false, end: false, current: false }
+        ]
+
         this.oldTime = 0
         this.time = 0.001
         this.radius = this.mobile ? 4 : 5
         this.randomRotNum = 0
         this.fogValue = 0.05
+
         this.z = (Math.cos(0) * 6) - 2
         this.x = (Math.sin(0) * 6) - 4
+
         this.screenPos = [
             - (0.50 + (Math.PI / 5.6) + (3 * (Math.PI / 2))),
             - (0.50 + (Math.PI / 5.6) + (2 * (Math.PI / 2))),
@@ -57,29 +63,127 @@ class Anime {
             green: 0
         }
 
-        this.snapOffset = this.stickToCenterAnime ? 0.4 : 0.5
+        this.snapOffset = this.stickToCenterAnime ? 0.4 : 0.3
         this.snapOffset = this.mobile ? 0.2 : this.snapOffset
         this.snapTo = 1
         this.snapToAnime = null
         this.currentSection = 0
         this.speed = 0
         this.oldSnapTo = 2
-        this.stopTilt = true
-        this.startFogAnime = false
+
         this.fogColor = "#c81cf3"
         this.projFogColors = ["#1af76e", "#000000", "#fffb22", "#3cff22",]
-        this.currentLookAt = new THREE.Vector3(2, 0, -2)
+
         this.videoMaterials = videoMaterials
         this.totalPi = Math.PI / 4
-        this.newMouseDown = false
+        this.rayMouseDown = false
         this.oldPi = 0
-        // if (!this.mobile) {
-        // }
-        this.cameraShake()
 
+        this.initSec1()
         this.rotInf()
 
     }
+
+    initSec1() {
+        this.raycaster = new THREE.Raycaster()
+        this.pointer = new THREE.Vector2()
+        this.mouse = new THREE.Vector2();
+        this.target = new THREE.Vector2();
+        this.final = new THREE.Vector2()
+        this.final.x = this.camera.rotation.x
+        this.final.y = this.camera.rotation.y
+        this.windowHalf = new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2);
+        this.mouse.x = (this.windowHalf.x);
+        this.mouse.y = (this.windowHalf.y);
+        this.addSection1Listeners()
+    }
+
+    addSection1Listeners() {
+
+        this.mouseDownFunc = this.sec1MouseDown.bind(this)
+        this.mouseUpFunc = this.sec1MouseUp.bind(this)
+        this.mouseMoveFunc = this.onMouseMove.bind(this)
+        this.keyPressFunc = this.onKeyPress.bind(this)
+        this.resizeFunc = this.resize.bind(this)
+
+        window.addEventListener(this.mobile ? 'touchstart' : 'mousedown', this.mouseDownFunc)
+        window.addEventListener(this.mobile ? 'touchend' : 'mouseup', this.mouseUpFunc)
+
+        if (!this.mobile) {
+            window.addEventListener('mousemove', this.mouseMoveFunc, false);
+            window.addEventListener('keypress', this.keyPressFunc, false);
+            window.addEventListener("resize", this.resizeFunc, false);
+        }
+    }
+
+    removeSec1Listeners() {
+        window.removeEventListener(this.mobile ? 'touchstart' : 'mousedown', this.mouseDownFunc)
+        window.removeEventListener(this.mobile ? 'touchend' : 'mouseup', this.mouseUpFunc)
+        if (!this.mobile) {
+            window.removeEventListener('mousemove', this.mouseMoveFunc, false);
+            window.removeEventListener('keypress', this.keyPressFunc, false);
+            window.removeEventListener("resize", this.resizeFunc, false);
+        }
+    }
+
+    sec1MouseDown(event) {
+        // console.log('mouse down')
+        this.pointer.x = ((this.mobile ? event.touches[0].clientX : event.clientX) / window.innerWidth) * 2 - 1;
+        this.pointer.y = - ((this.mobile ? event.touches[0].clientY : event.clientY) / window.innerHeight) * 2 + 1;
+        this.rayMouseDown = true
+    }
+
+    sec1MouseUp(event) {
+        // console.log('mouse up')
+        this.pointer.x = ((this.mobile ? event.touches[0].clientX : event.clientX) / window.innerWidth) * 2 - 1;
+        this.pointer.y = - ((this.mobile ? event.touches[0].clientY : event.clientY) / window.innerHeight) * 2 + 1;
+        this.rayMouseDown = false
+    }
+
+    resize() {
+        this.windowHalf = new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2);
+    }
+
+    onMouseMove(event) {
+        this.mouse.x = (event.clientX - this.windowHalf.x);
+        this.mouse.y = (event.clientY - this.windowHalf.x);
+    }
+
+    onKeyPress(e) {
+        if (!isNaN(e.key)) {
+            this.goToSection(Number(e.key))
+        }
+        if (e.key == 'n') {
+            console.log(this.camera.position, this.camera.rotation)
+        }
+        if (e.key == 't') {
+            console.log(this.totalPi)
+        }
+    }
+
+    mouseCameraMovement() {
+        // console.log('camera move')
+        this.target.x = (1 - this.mouse.x) * 0.00004;
+        this.target.y = (1 - this.mouse.y) * 0.00004;
+        this.final.x += 0.05 * (this.target.y - this.final.x);
+        this.final.y += 0.05 * (this.target.x - this.final.y);
+        gsap.to(this.camera.rotation, { x: this.final.x + this.offset.x, y: this.final.y + this.offset.y, duration: 0.01 })
+    }
+
+    rayFunc() {
+        // console.log('ray func')
+        this.raycaster.setFromCamera(this.pointer, this.camera);
+        const intersects = this.raycaster.intersectObjects(this.scene.children);
+
+        for (let i = 0; i < intersects.length; i++) {
+            if (intersects[i].object.name == 'screen') {
+                this.options.changeSection(1)
+                this.goToSection(1)
+                return
+            }
+        }
+    }
+
 
     absDist(num1, num2, side = this.dir) {
         if (side) {
@@ -130,11 +234,6 @@ class Anime {
             this.changeFogColor()
             this.oldSnapTo = this.snapTo
         }
-        else {
-            // this.options.removeProject()
-        }
-
-
 
     }
 
@@ -193,11 +292,7 @@ class Anime {
         this.randomRotation = null
     }
 
-    addWheelListeners() {
-        // this.rotMov = this.wheelMove.bind(this)
-        // this.mouseDown = true
-        // document.addEventListener('wheel', this.rotMov)
-
+    addSec2Listeners() {
         this.rotStart = this.rotateStart.bind(this)
         this.rotMov = this.rotateMove.bind(this)
         this.rotUp = this.rotateUp.bind(this)
@@ -214,6 +309,7 @@ class Anime {
     }
 
     rotateMove(evt) {
+        // console.log('here')
         if (!this.mouseDown) {
             return;
         }
@@ -258,8 +354,14 @@ class Anime {
         }
 
         this.mouseDown = true;
-        this.mouseX = evt.clientX;
-        this.mouseY = evt.clientY;
+        if (this.mobile) {
+            this.mouseX = evt.touches[0].screenX;
+            this.mouseY = evt.touches[0].screenY;
+        }
+        else {
+            this.mouseX = evt.clientX;
+            this.mouseY = evt.clientY;
+        }
     }
 
     rotateUp(evt) {
@@ -275,9 +377,18 @@ class Anime {
             return
         }
 
-        if (this.currentSection == 1) {
-            this.stopTilt = true
+        this.sectionMap[0].end = false
+        this.sectionMap[1].end = false
+        this.sectionMap[2].end = false
+        this.sectionMap[this.currentSection].start = true
+
+        if (this.sectionMap[1].start) {
             this.removeDragListeners()
+        }
+
+        if (this.sectionMap[0].start) {
+            this.rayMouseDown = false
+            this.removeSec1Listeners()
         }
 
         if (to == 0) {
@@ -287,14 +398,11 @@ class Anime {
         else if (to == 1) {
             this.goToProjects()
             this.currentSection = 1
-            this.stopTilt = false
         }
         else if (to == 2) {
             this.goToAbout()
             this.currentSection = 2
         }
-
-        // this.currentSection = to
     }
 
     goToHome() {
@@ -306,7 +414,6 @@ class Anime {
     }
 
     goToProjects() {
-        this.stopAnime = true
         this.stopRotInf()
         this.playGoToAnime(1)
         this.rotateTo(0)
@@ -321,7 +428,6 @@ class Anime {
     }
 
     playGoToAnime(section) {
-        this.goToAnimeRunning = true
         if (this.projAnime) {
             this.projAnime.kill()
         }
@@ -334,7 +440,10 @@ class Anime {
         if (section == 0) {
             this.homeAnime = gsap.timeline({
                 onComplete: () => {
-                    this.goToAnimeRunning = false
+                    this.options.finishSectionChange(0)
+                    this.sectionMap[0].end = true
+                    this.sectionMap[0].start = false
+                    this.addSection1Listeners()
                     console.log('completed home')
                 }
             })
@@ -347,25 +456,6 @@ class Anime {
             }
             let timer = 1
             this.homeAnime.to(this.mainLight, { intensity: 20, duration: timer * 2, })
-
-            if (!this.mobile) {
-                // this.homeAnime.to('.overlay',
-                //     {
-                //         opacity: 1,
-                //         duration: 1,
-                //         duration: timer,
-                //         delay: -timer,
-                //     }
-                // )
-                // this.homeAnime.to('.overlay1',
-                //     {
-                //         opacity: 0,
-                //         duration: 1,
-                //         duration: timer,
-                //         delay: -timer,
-                //     }
-                // )
-            }
 
             this.homeAnime.to(this,
                 {
@@ -401,39 +491,20 @@ class Anime {
         else if (section == 1) {
             this.projAnime = gsap.timeline({
                 onComplete: () => {
+                    this.options.finishSectionChange(1)
                     console.log('completed proj')
-                    this.goToAnimeRunning = false
-                    this.startFogAnime = true
-                    this.addWheelListeners()
+                    this.sectionMap[1].end = true
+
+                    this.sectionMap[1].start = false
+                    this.addSec2Listeners()
                     this.onProjectsOptimizations(1)
-                    this.snapToScreen()
+                    this.snapToScreeSpec()
                     this.currentSection = 1
                 }
             })
 
             let timer = 1
             this.projAnime.to(this.mainLight, { intensity: 1, duration: timer * 2, },)
-
-
-            if (!this.mobile) {
-                // this.projAnime.to('.overlay',
-                //     {
-                //         opacity: 0,
-                //         duration: 1,
-                //         duration: timer,
-                //         delay: -timer,
-                //     }
-                // )
-                // this.projAnime.to('.overlay1',
-                //     {
-                //         opacity: 1,
-                //         duration: 1,
-                //         duration: timer,
-                //         delay: -timer,
-                //     }
-                // )
-            }
-
 
             this.projAnime.to(this,
                 {
@@ -470,8 +541,11 @@ class Anime {
         else if (section == 2) {
             this.aboutAnime = gsap.timeline({
                 onComplete: () => {
+                    this.options.finishSectionChange(2)
                     this.currentSection = 2
-                    this.goToAnimeRunning = false
+                    this.sectionMap[2].end = true
+
+                    this.sectionMap[2].start = false
                     console.log('completed about')
                 }
             })
@@ -484,34 +558,12 @@ class Anime {
             }
             let timer = 1
 
-
-
-
             this.aboutAnime.to(this.mainLight,
                 {
                     intensity: this.mobile ? 10 : 20,
                     duration: timer * 2
                 }
             )
-
-            if (!this.mobile) {
-                // this.aboutAnime.to('.overlay',
-                //     {
-                //         opacity: 1,
-                //         duration: 1,
-                //         duration: timer,
-                //         delay: -timer,
-                //     }
-                // )
-                // this.aboutAnime.to('.overlay1',
-                //     {
-                //         opacity: 0,
-                //         duration: 1,
-                //         duration: timer,
-                //         delay: -timer,
-                //     }
-                // )
-            }
 
             this.aboutAnime.to(this,
                 {
@@ -543,6 +595,16 @@ class Anime {
                 }
             )
         }
+    }
+
+    snapToScreeSpec() {
+
+        this.snapTo = 4
+        this.totalPi = Math.PI/4
+        this.options.showProject(0, 'f')
+        this.decideClosestSnapTo(this.totalPi)
+        this.changeFogColor()
+        this.oldSnapTo = this.snapTo
     }
 
     onProjectsOptimizations(section) {
@@ -594,76 +656,6 @@ class Anime {
     }
 
 
-    wheelMove(e) {
-        let dx = e.deltaY
-        this.dx = dx;
-    }
-
-    cameraShake() {
-        this.raycaster = new THREE.Raycaster()
-        this.pointer = new THREE.Vector2()
-        this.mouse = new THREE.Vector2();
-        this.target = new THREE.Vector2();
-        this.final = new THREE.Vector2()
-        this.final.x = this.camera.rotation.x
-        this.final.y = this.camera.rotation.y
-        this.windowHalf = new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2);
-        this.mouse.x = (this.windowHalf.x);
-        this.mouse.y = (this.windowHalf.y);
-        // document.addEventListener('mousemove', this.onMouseMove.bind(this), false);
-        window.addEventListener(this.mobile ? 'touchstart' : 'mousedown', (event) => {
-            this.pointer.x = ((this.mobile ? event.touches[0].clientX : event.clientX) / window.innerWidth) * 2 - 1;
-            this.pointer.y = - ((this.mobile ? event.touches[0].clientY : event.clientY) / window.innerHeight) * 2 + 1;
-            this.newMouseDown = true
-        })
-        window.addEventListener(this.mobile ? 'touchmove' : 'mousemove', (event) => {
-            this.pointer.x = ((this.mobile ? event.touches[0].clientX : event.clientX) / window.innerWidth) * 2 - 1;
-            this.pointer.y = - ((this.mobile ? event.touches[0].clientY : event.clientY) / window.innerHeight) * 2 + 1;
-            this.newMouseDown = false
-        })
-        // document.addEventListener('wheel', this.onMouseWheel.bind(this), false);
-        // document.addEventListener('keypress', this.onKeyPress.bind(this), false);
-        // window.addEventListener("resize", this.resize.bind(this));
-    }
-
-    resize() {
-        this.windowHalf = new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2);
-    }
-
-    onMouseMove(event) {
-        this.pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-        this.pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
-        this.mouse.x = (event.clientX - this.windowHalf.x);
-        this.mouse.y = (event.clientY - this.windowHalf.x);
-    }
-
-    onMouseWheel(event) {
-        if (this.currentSection == 1) {
-            return
-        }
-        let offset = 0.2
-        if (this.camera.position.z > this.positionOffset.z + offset && event.deltaY > 0) {
-            return
-        }
-        if (this.camera.position.z < this.positionOffset.z - offset && event.deltaY < 0) {
-            return
-        }
-        gsap.to(this.camera.position, { z: this.camera.position.z + (event.deltaY * 0.001), duration: 0.001 })
-    }
-
-    onKeyPress(e) {
-        if (!isNaN(e.key)) {
-            this.goToSection(Number(e.key))
-        }
-        if (e.key == 'n') {
-            console.log(this.camera.position, this.camera.rotation)
-        }
-        if (e.key == 't') {
-            console.log(this.totalPi)
-        }
-    }
-
-
     moveScreen() {
         this.timeDelta = this.time - this.oldTime
         this.speed = (this.dx / this.timeDelta) * 10
@@ -695,8 +687,6 @@ class Anime {
             this.moveScreenAnime.kill()
         }
 
-
-
         this.moveScreenAnime = gsap.to(this, {
             totalPi: this.totalPi + pi,
             onUpdate: () => {
@@ -708,11 +698,9 @@ class Anime {
             },
             duration: this.mobile ? dur ? 1.3 : 1 : 0.6
         })
-        // this.oldPi = pi
     }
 
     tiltCam() {
-
         if (this.shakeAnime) {
             this.shakeAnime.kill()
         }
@@ -729,56 +717,29 @@ class Anime {
         )
     }
 
-    sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    mouseCameraMovement() {
-        this.target.x = (1 - this.mouse.x) * 0.00009;
-        this.target.y = (1 - this.mouse.y) * 0.00009;
-        this.final.x += 0.05 * (this.target.y - this.final.x);
-        this.final.y += 0.05 * (this.target.x - this.final.y);
-        gsap.to(this.camera.rotation, { x: this.final.x + this.offset.x, y: this.final.y + this.offset.y, duration: 0.001 })
-    }
-
-    rayFunc() {
-        // update the picking ray with the camera and pointer position
-        this.raycaster.setFromCamera(this.pointer, this.camera);
-
-        // calculate objects intersecting the picking ray
-        const intersects = this.raycaster.intersectObjects(this.scene.children);
-
-        for (let i = 0; i < intersects.length; i++) {
-            if (intersects[i].object.name == 'screen') {
-                this.options.changeSection(1)
-                this.goToSection(1)
-                return
-            }
-        }
-    }
-
     animate() {
         this.time = Date.now()
-        if (!this.stopAnime && !this.mobile) {
+        if (!this.mobile && (this.currentSection == 0 && !this.sectionMap[0].start)) {
             this.mouseCameraMovement()
+        }
+        if ((this.currentSection == 0 && !this.sectionMap[0].start) && this.rayMouseDown) {
+            this.rayFunc()
         }
         if (this.currentSection == 1) {
             if (Math.abs(this.totalPi) > 2 * Math.PI) {
                 this.totalPi = this.totalPi % (2 * Math.PI)
             }
-            if (!this.stopTilt && !this.mobile) {
-                this.tiltCam()
-            }
-            if (this.startFogAnime) {
+            if (this.sectionMap[1].end) {
                 this.snapToScreen(true)
-            }
-            if (this.mouseDown && !this.stopTilt) {
-                this.moveScreen()
+                if (!this.mobile) {
+                    this.tiltCam()
+                }
+                if (this.mouseDown) {
+                    this.moveScreen()
+                }
             }
         }
-        if (this.currentSection == 0 && this.newMouseDown) {
-            this.rayFunc()
-        }
+
         this.oldTime = this.time
         this.dx = 0
     }
