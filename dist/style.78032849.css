@@ -101,9 +101,7 @@ body {
 }
 
 
-.nav-cont>div:hover {
-    opacity: 1;
-}
+
 
 .nav-cont>div>p {
     margin: 0;
@@ -124,6 +122,70 @@ body {
     border-left: 0.9px rgba(255, 255, 255, 0.7) solid;
     border-right: 0.9px rgba(255, 255, 255, 0.7) solid;
 }
+
+
+.nav-cont>div:nth-of-type(2):not(.active) {
+    border-top: 0.9px rgba(255, 255, 255, 0.7) solid;
+    border-left: none;
+    border-right: 0.9px rgba(255, 255, 255, 0.7) solid;
+}
+
+.nav-cont>div:nth-of-type(3):not(.active) {
+    border-top: 0.9px rgba(255, 255, 255, 0.7) solid;
+    border-left: none;
+    border-right: 0.9px rgba(255, 255, 255, 0.7) solid;
+}
+
+
+.nav-cont>div:nth-of-type(1):not(.active) {
+    border-top: 0.9px rgba(255, 255, 255, 0.7) solid;
+    border-left: none;
+    border-right: none;
+}
+
+.nav-cont>div:nth-of-type(3):not(.active) {
+    border-top: 0.9px rgba(255, 255, 255, 0.7) solid;
+    border-left: none;
+}
+
+
+
+.nav-cont>div:nth-of-type(1):not(.active) {
+    border-right: 0.9px rgba(255, 255, 255, 0.7) solid;
+}
+
+
+/* .nav-cont>div:nth-of-type(2):not(.active) {
+    border-right: none;
+} */
+
+
+.nav-cont>div:not(.active):last-of-type {
+    border-right: 0.9px rgba(255, 255, 255, 0.7) solid;
+}
+
+.nav-cont>div:not(.active):first-of-type {
+    border-left: 0.9px rgba(255, 255, 255, 0.7) solid;
+}
+
+.nav-cont>div:not(.active):hover {
+    opacity: 1;
+    border-top: 0.9px rgba(255, 255, 255, 0.7) solid;
+    border-left: 0.9px rgba(255, 255, 255, 0.7) solid;
+    border-right: 0.9px rgba(255, 255, 255, 0.7) solid;
+}
+
+.nav-cont>div.active:hover {
+    opacity: 1;
+    border-top: 2.9px #cf08f7 solid;
+    border-left: 2.9px #cf08f7 solid;
+    border-right: 2.9px #cf08f7 solid;
+    color: #ffffff
+}
+
+
+
+
 
 
 

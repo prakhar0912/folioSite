@@ -148,7 +148,6 @@ class Content {
             this.animateNavAnime.to('.nav-cont',
                 {
                     gridTemplateColumns: `${this.mainPercent}% ${(100 - this.mainPercent) / 2}% ${(100 - this.mainPercent) / 2}%`,
-
                 },
             )
         }
