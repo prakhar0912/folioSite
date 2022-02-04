@@ -42593,6 +42593,7 @@ var Objects = /*#__PURE__*/function () {
     var scene = _ref.scene,
         camera = _ref.camera,
         renderer = _ref.renderer,
+        options = _ref.options,
         shadows = _ref.shadows,
         mobileFloor = _ref.mobileFloor,
         noScreenShader = _ref.noScreenShader,
@@ -42613,6 +42614,7 @@ var Objects = /*#__PURE__*/function () {
     this.whiteFloor = whiteFloor;
     this.noFloor = noFloor;
     this.mobile = mobile;
+    this.options = options;
     this.addFloor();
     this.addScreenSegment();
     this.loadModels();
@@ -42923,11 +42925,6 @@ var Objects = /*#__PURE__*/function () {
       }
 
       var video = document.querySelector("#video".concat(videoNum + 1));
-
-      video.onloadedmetadata = function () {
-        console.log(videoNum);
-      };
-
       video.play();
       var texture = new THREE.VideoTexture(video);
       texture.wrapS = THREE.RepeatWrapping; // texture.wrapT = THREE.RepeatWrapping;
@@ -43074,7 +43071,7 @@ var Objects = /*#__PURE__*/function () {
       }
 
       this.scene.add(model);
-      console.log(i, j);
+      this.options.loadedModel(i, j);
     }
   }]);
 
@@ -49649,6 +49646,10 @@ var Content = /*#__PURE__*/function () {
     }
 
     this.currentSection = 0;
+    this.preLoader = document.querySelector('.preloader');
+    this.loaderLen = document.querySelector('.loader');
+    this.loaderNum = document.querySelector('.loader > p');
+    this.loaded = 0;
     this.resizeFunc();
     this.addEventListeners();
     this.goToSectionAnime = goToSection;
@@ -49657,6 +49658,52 @@ var Content = /*#__PURE__*/function () {
   }
 
   _createClass(Content, [{
+    key: "loadedModel",
+    value: function loadedModel(i, j) {
+      var _this = this;
+
+      if (this.loaderAnime) {
+        this.loaderAnime.kill();
+      }
+
+      this.loaderAnime = _gsap.default.to(this.loaderLen, {
+        width: "".concat(this.loaded / 19 * (this.mobile ? 90 : 97), "vw"),
+        onComplete: function onComplete() {
+          if (_this.loaded >= 19) {
+            _this.removeLoader();
+          }
+        }
+      });
+      this.loaderNum.innerHTML = Math.round(this.loaded * 100 / 19);
+      this.loaded++;
+    }
+  }, {
+    key: "removeLoader",
+    value: function removeLoader() {
+      var _this2 = this;
+
+      _gsap.default.to('.pretext', {
+        opacity: 0,
+        duration: 0.5,
+        ease: "Power4.in"
+      });
+
+      _gsap.default.to(this.loaderLen, {
+        opacity: 0,
+        duration: 0.5,
+        ease: "Power4.in"
+      });
+
+      _gsap.default.to(this.preLoader, {
+        opacity: 0,
+        duration: 1,
+        onComplete: function onComplete() {
+          _this2.preLoader.style.display = 'none';
+        },
+        ease: "Power4.in"
+      });
+    }
+  }, {
     key: "removeProject",
     value: function removeProject() {// this.hideAll('projects')
     }
@@ -49697,7 +49744,7 @@ var Content = /*#__PURE__*/function () {
   }, {
     key: "moveToSection",
     value: function moveToSection(to) {
-      var _this = this;
+      var _this3 = this;
 
       var option = true;
 
@@ -49714,14 +49761,14 @@ var Content = /*#__PURE__*/function () {
           opacity: 0,
           duration: 0.3,
           onComplete: function onComplete() {
-            _this.sections[_this.currentSection].classList.add('hide-section');
+            _this3.sections[_this3.currentSection].classList.add('hide-section');
 
-            _this.goToSectionAnime(to);
+            _this3.goToSectionAnime(to);
 
-            _this.currentSection = to;
+            _this3.currentSection = to;
 
-            if (_this.currentSection != 1) {
-              _this.hideHint();
+            if (_this3.currentSection != 1) {
+              _this3.hideHint();
             }
           }
         });
@@ -49815,16 +49862,16 @@ var Content = /*#__PURE__*/function () {
   }, {
     key: "contentAnimations",
     value: function contentAnimations() {
-      var _this2 = this;
+      var _this4 = this;
 
       document.querySelectorAll('.line-anime').forEach(function (el, i) {
         el.addEventListener('mouseenter', function () {
-          if (_this2.nextAnime && _this2.nextAnime.isActive()) {
-            _this2.nextAnime.kill();
+          if (_this4.nextAnime && _this4.nextAnime.isActive()) {
+            _this4.nextAnime.kill();
 
-            _this2.lineAnimeEnd(el);
+            _this4.lineAnimeEnd(el);
           } else {
-            _this2.lineAnimeStart(el, 'f');
+            _this4.lineAnimeStart(el, 'f');
           }
         }); // el.addEventListener('mouseleave', () => {
         //     // if (this.nextAnime) {
@@ -49837,12 +49884,12 @@ var Content = /*#__PURE__*/function () {
   }, {
     key: "animateNav",
     value: function animateNav(i) {
-      var _this3 = this;
+      var _this5 = this;
 
       this.animateNavAnime = _gsap.default.timeline({
         paused: true,
         onComplete: function onComplete() {
-          _this3.navBtns[i].classList.add('active');
+          _this5.navBtns[i].classList.add('active');
         }
       });
 
@@ -49924,17 +49971,17 @@ var Content = /*#__PURE__*/function () {
   }, {
     key: "addEventListeners",
     value: function addEventListeners() {
-      var _this4 = this;
+      var _this6 = this;
 
       this.nextBtns = document.querySelectorAll('.next');
       this.nextBtns.forEach(function (el, i) {
         el.addEventListener('click', function () {
-          _this4.navClick(i + 1);
+          _this6.navClick(i + 1);
         });
       });
       this.navBtns.forEach(function (el, i) {
         el.addEventListener('click', function () {
-          _this4.navClick(i);
+          _this6.navClick(i);
         });
       });
       window.addEventListener('resize', this.resizeFunc.bind(this));
@@ -49942,10 +49989,10 @@ var Content = /*#__PURE__*/function () {
       if (!this.mobile) {
         this.socialsBtns.forEach(function (e) {
           e.addEventListener('mouseenter', function () {
-            _this4.socialOpen(e);
+            _this6.socialOpen(e);
           });
           e.addEventListener('mouseleave', function () {
-            _this4.socialClose(e);
+            _this6.socialClose(e);
           });
         });
       }
@@ -50173,7 +50220,12 @@ var objects = new _Objects.Objects({
   noScreenShader: noScreenShader,
   bufferGeo: bufferGeo,
   whiteFloor: whiteFloor,
-  mobile: mobile
+  mobile: mobile,
+  options: {
+    loadedModel: function loadedModel(i, j) {
+      content.loadedModel(i, j);
+    }
+  }
 });
 var animes = new _Anime.Anime({
   screen: objects.masterMesh,

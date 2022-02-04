@@ -16,11 +16,60 @@ class Content {
             this.mainPercent = 50
         }
         this.currentSection = 0
+        this.preLoader = document.querySelector('.preloader')
+        this.loaderLen = document.querySelector('.loader')
+        this.loaderNum = document.querySelector('.loader > p')
+        this.loaded = 0
         this.resizeFunc()
         this.addEventListeners()
         this.goToSectionAnime = goToSection
         this.contentAnimations()
         this.animateNav(0)
+    }
+
+    loadedModel(i, j){
+        if(this.loaderAnime){
+            this.loaderAnime.kill()
+        }
+        this.loaderAnime = gsap.to(this.loaderLen, 
+            {
+                width: `${(this.loaded/19)*(this.mobile ? 90 : 97)}vw`,
+                onComplete: () => {
+                    if(this.loaded >= 19){
+                        this.removeLoader()
+                    }
+                }
+            }
+        )
+        this.loaderNum.innerHTML = Math.round(this.loaded*100/19)
+        this.loaded++
+    }
+
+    removeLoader(){
+        gsap.to('.pretext', 
+            {
+                opacity: 0,
+                duration: 0.5,
+                ease: "Power4.in"
+            }    
+        )
+        gsap.to(this.loaderLen, 
+            {
+                opacity: 0,
+                duration: 0.5,
+                ease: "Power4.in"
+            }    
+        )
+        gsap.to(this.preLoader, 
+            {
+                opacity: 0,
+                duration: 1,
+                onComplete: () => {
+                    this.preLoader.style.display = 'none'
+                },
+                ease: "Power4.in"
+            }    
+        )
     }
 
     removeProject() {

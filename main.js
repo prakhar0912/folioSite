@@ -94,7 +94,12 @@ const objects = new Objects({
     noScreenShader,
     bufferGeo,
     whiteFloor,
-    mobile
+    mobile,
+    options: {
+        loadedModel: (i, j) =>{
+            content.loadedModel(i, j)
+        }
+    }
 })
 
 
