@@ -36,17 +36,12 @@ class ThreeInit {
     }
 
 
-
-
-
-    // this.camera.lookAt(new THREE.Vector3(2,0,-2))
-
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       powerPreference: 'high-performance',
       alpha: true
     });
-    this.mobilePixelRatio = 1.3
+    this.mobilePixelRatio = 1.5
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight)
     this.renderer.setPixelRatio(this.mobile ? this.mobilePixelRatio : window.devicePixelRatio);
 

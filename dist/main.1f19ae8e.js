@@ -38379,15 +38379,14 @@ var ThreeInit = /*#__PURE__*/function () {
       this.camera.rotation.x = -0.6132813005274419;
       this.camera.rotation.y = this.mobile ? 0.5 : 0.3006405553572554;
       this.camera.rotation.z = 0.25548036184093635;
-    } // this.camera.lookAt(new THREE.Vector3(2,0,-2))
-
+    }
 
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       powerPreference: 'high-performance',
       alpha: true
     });
-    this.mobilePixelRatio = 1.3;
+    this.mobilePixelRatio = 1.5;
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
     this.renderer.setPixelRatio(this.mobile ? this.mobilePixelRatio : window.devicePixelRatio);
     this.renderer.physicallyCorrectLights = true;
@@ -50100,6 +50099,13 @@ if (mobileDevice) {
   }, false);
 }
 
+function iOS() {
+  return ['iPad Simulator', 'iPhone Simulator', 'iPod Simulator', 'iPad', 'iPhone', 'iPod'].includes(navigator.platform) // iPad on iOS 13 detection
+  || navigator.userAgent.includes("Mac") && "ontouchend" in document;
+}
+
+console.log(iOS);
+alert(window.navigator.hardwareConcurrency);
 var mobile = mobileDevice;
 var orbital = false;
 var shadows = true;
@@ -50229,7 +50235,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "46417" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "39405" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
