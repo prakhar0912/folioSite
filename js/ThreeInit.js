@@ -16,14 +16,28 @@ class ThreeInit {
     this.mobile = mobile
     this.aspect = this.container.clientWidth / this.container.clientHeight
     this.camera = new THREE.PerspectiveCamera(this.mobile ? 85 : 65, this.aspect, 0.1, 1000);
-    this.camera.position.x = 1.857694276842902
-    this.camera.position.y = 4.960754567944053
-    this.camera.position.z = 3.728480970069918
 
-    this.camera.rotation.x = -0.6132813005274419
-    this.camera.rotation.y = this.mobile ? 0.5 : 0.3006405553572554
-    this.camera.rotation.z = 0.25548036184093635
-    
+    if (this.mobile) {
+      this.camera.position.x = -0.4869828944363806
+      this.camera.position.y = 2.572591503477464
+      this.camera.position.z = 1.7120534479976164
+
+      this.camera.rotation.x = -0.4645205390377041
+      this.camera.rotation.y = 0.259164209172283
+      this.camera.rotation.z = 0.12771715085610133
+    }
+    else {
+      this.camera.position.x = 1.857694276842902
+      this.camera.position.y = 4.960754567944053
+      this.camera.position.z = 3.728480970069918
+      this.camera.rotation.x = -0.6132813005274419
+      this.camera.rotation.y = this.mobile ? 0.5 : 0.3006405553572554
+      this.camera.rotation.z = 0.25548036184093635
+    }
+
+
+
+
 
     // this.camera.lookAt(new THREE.Vector3(2,0,-2))
 

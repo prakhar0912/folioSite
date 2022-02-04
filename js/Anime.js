@@ -21,6 +21,8 @@ class Anime {
         this.mainLight = mainLight
         this.mobileFloorMesh = mobileFloorMesh
         this.circularMesh = circularMesh
+        this.rotCirc = document.querySelector('.rot-circ-outer')
+        this.rotCircPi = (Math.PI/4)
         if (!this.mobile) {
             this.mirror = mirror
         }
@@ -72,12 +74,16 @@ class Anime {
         this.oldSnapTo = 2
 
         this.fogColor = "#c81cf3"
-        this.projFogColors = ["#1af76e", "#000000", "#fffb22", "#3cff22",]
+        this.projFogColors = ["#ffe600", "#000000", "#0099ff", "#b700ff",]
+        this.projFogColors = ["#1af76e", "#000000", "#fffb22", "#b700ff",]
 
         this.videoMaterials = videoMaterials
         this.totalPi = Math.PI / 4
         this.rayMouseDown = false
         this.oldPi = 0
+
+        this.cursorOnScreen = false
+        this.oldCursorOnScreen = false
 
         this.initSec1()
         this.rotInf()
@@ -108,10 +114,9 @@ class Anime {
 
         window.addEventListener(this.mobile ? 'touchstart' : 'mousedown', this.mouseDownFunc)
         window.addEventListener(this.mobile ? 'touchend' : 'mouseup', this.mouseUpFunc)
-
         if (!this.mobile) {
-            window.addEventListener('mousemove', this.mouseMoveFunc, false);
             window.addEventListener('keypress', this.keyPressFunc, false);
+            window.addEventListener('mousemove', this.mouseMoveFunc, false);
             window.addEventListener("resize", this.resizeFunc, false);
         }
     }
@@ -145,6 +150,8 @@ class Anime {
     }
 
     onMouseMove(event) {
+        this.pointer.x = ((this.mobile ? event.touches[0].clientX : event.clientX) / window.innerWidth) * 2 - 1;
+        this.pointer.y = - ((this.mobile ? event.touches[0].clientY : event.clientY) / window.innerHeight) * 2 + 1;
         this.mouse.x = (event.clientX - this.windowHalf.x);
         this.mouse.y = (event.clientY - this.windowHalf.x);
     }
@@ -170,8 +177,7 @@ class Anime {
         gsap.to(this.camera.rotation, { x: this.final.x + this.offset.x, y: this.final.y + this.offset.y, duration: 0.01 })
     }
 
-    rayFunc() {
-        // console.log('ray func')
+    rayFuncMobile() {
         this.raycaster.setFromCamera(this.pointer, this.camera);
         const intersects = this.raycaster.intersectObjects(this.scene.children);
 
@@ -182,6 +188,34 @@ class Anime {
                 return
             }
         }
+    }
+
+    rayFuncLaptop(){
+        this.raycaster.setFromCamera(this.pointer, this.camera);
+        const intersects = this.raycaster.intersectObjects(this.scene.children);
+
+        for (let i = 0; i < intersects.length; i++) {
+            if (intersects[i].object.name == 'screen') {
+                this.cursorOnScreen = true
+                break
+            }
+            else {
+                this.cursorOnScreen = false
+            }
+        }
+        if (this.oldCursorOnScreen != this.cursorOnScreen) {
+            if (this.cursorOnScreen) {
+                document.body.style.cursor = 'pointer'
+            }
+            else {
+                document.body.style.cursor = 'default'
+            }
+        }
+        if (this.cursorOnScreen && this.rayMouseDown) {
+            this.options.changeSection(1)
+            this.goToSection(1)
+        }
+        this.oldCursorOnScreen = this.cursorOnScreen
     }
 
 
@@ -282,7 +316,19 @@ class Anime {
                 }
             }
         })
+        this.rotateCirc(((Math.PI / 2.3) + num * (Math.PI / 2))*(180/Math.PI))
+        
     }
+
+    rotateCirc(deg){
+        if (this.circRotAnime) {
+            this.circRotAnime.kill()
+        }
+        this.circRotAnime = gsap.to(this.rotCirc, {
+            rotate: deg, duration: 2.5, ease: "power4.out"
+        })
+    }
+
 
     stopRotInf() {
         if (this.randomRotAnime) {
@@ -362,6 +408,7 @@ class Anime {
             this.mouseX = evt.clientX;
             this.mouseY = evt.clientY;
         }
+        document.body.style.cursor = 'grabbing'
     }
 
     rotateUp(evt) {
@@ -370,6 +417,7 @@ class Anime {
         }
         this.mouseDown = false;
         this.snapToScreen(false)
+        document.body.style.cursor = 'grab'
     }
 
     goToSection(to) {
@@ -389,11 +437,14 @@ class Anime {
         if (this.sectionMap[0].start) {
             this.rayMouseDown = false
             this.removeSec1Listeners()
+            document.body.style.cursor = 'default'
+            this.cursorOnScreen = false
         }
 
         if (to == 0) {
             this.goToHome()
             this.currentSection = 0
+            document.body.style.cursor = 'default'
         }
         else if (to == 1) {
             this.goToProjects()
@@ -402,6 +453,7 @@ class Anime {
         else if (to == 2) {
             this.goToAbout()
             this.currentSection = 2
+            document.body.style.cursor = 'default'
         }
     }
 
@@ -470,9 +522,9 @@ class Anime {
             )
             this.homeAnime.to(this.camera.position,
                 {
-                    x: 1.857694276842902,
-                    y: 4.960754567944053,
-                    z: 3.728480970069918,
+                    x: this.mobile ? -0.8869828944363806 : 1.857694276842902,
+                    y: this.mobile ? 2.572591503477464 : 4.960754567944053,
+                    z: this.mobile ? 1.7120534479976164 : 3.728480970069918,
                     duration: 2 * timer,
                     delay: -2 * timer
                 }
@@ -480,9 +532,9 @@ class Anime {
 
             this.homeAnime.to(this.camera.rotation,
                 {
-                    x: -0.6132813005274419,
-                    z: 0.25548036184093635,
-                    y: this.mobile ? 0.5 : 0.3006405553572554,
+                    x: this.mobile ? -0.4645205390377041: -0.6132813005274419,
+                    z: this.mobile ? 0.12771715085610133: 0.25548036184093635,
+                    y: this.mobile ? 0.259164209172283: 0.3006405553572554,
                     duration: timer,
                     delay: -(2 * timer),
                 }
@@ -494,11 +546,11 @@ class Anime {
                     this.options.finishSectionChange(1)
                     console.log('completed proj')
                     this.sectionMap[1].end = true
-
                     this.sectionMap[1].start = false
                     this.addSec2Listeners()
                     this.onProjectsOptimizations(1)
                     this.snapToScreeSpec()
+                    document.body.style.cursor = 'grab'
                     this.currentSection = 1
                 }
             })
@@ -673,6 +725,7 @@ class Anime {
             this.snapToAnime.kill()
         }
         this.dir = this.pi > 0 ? true : false
+        this.rotCircPi += this.pi
 
         this.moveToScreen(this.pi)
     }
@@ -695,6 +748,7 @@ class Anime {
                 this.camera.position.x = x
                 this.camera.position.z = z
                 this.camera.rotation.y = this.totalPi
+                this.rotCirc.style.transform = `rotate(${(this.totalPi*180)/Math.PI}deg)`
             },
             duration: this.mobile ? dur ? 1.3 : 1 : 0.6
         })
@@ -722,8 +776,15 @@ class Anime {
         if (!this.mobile && (this.currentSection == 0 && !this.sectionMap[0].start)) {
             this.mouseCameraMovement()
         }
-        if ((this.currentSection == 0 && !this.sectionMap[0].start) && this.rayMouseDown) {
-            this.rayFunc()
+        if ((this.currentSection == 0 && !this.sectionMap[0].start)) {
+            if(this.mobile){
+                if(this.rayMouseDown){
+                    this.rayFuncMobile()
+                }
+            }
+            else{
+                this.rayFuncLaptop()
+            }
         }
         if (this.currentSection == 1) {
             if (Math.abs(this.totalPi) > 2 * Math.PI) {

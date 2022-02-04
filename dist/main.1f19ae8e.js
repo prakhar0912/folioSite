@@ -38364,12 +38364,23 @@ var ThreeInit = /*#__PURE__*/function () {
     this.mobile = mobile;
     this.aspect = this.container.clientWidth / this.container.clientHeight;
     this.camera = new THREE.PerspectiveCamera(this.mobile ? 85 : 65, this.aspect, 0.1, 1000);
-    this.camera.position.x = 1.857694276842902;
-    this.camera.position.y = 4.960754567944053;
-    this.camera.position.z = 3.728480970069918;
-    this.camera.rotation.x = -0.6132813005274419;
-    this.camera.rotation.y = this.mobile ? 0.5 : 0.3006405553572554;
-    this.camera.rotation.z = 0.25548036184093635; // this.camera.lookAt(new THREE.Vector3(2,0,-2))
+
+    if (this.mobile) {
+      this.camera.position.x = -0.4869828944363806;
+      this.camera.position.y = 2.572591503477464;
+      this.camera.position.z = 1.7120534479976164;
+      this.camera.rotation.x = -0.4645205390377041;
+      this.camera.rotation.y = 0.259164209172283;
+      this.camera.rotation.z = 0.12771715085610133;
+    } else {
+      this.camera.position.x = 1.857694276842902;
+      this.camera.position.y = 4.960754567944053;
+      this.camera.position.z = 3.728480970069918;
+      this.camera.rotation.x = -0.6132813005274419;
+      this.camera.rotation.y = this.mobile ? 0.5 : 0.3006405553572554;
+      this.camera.rotation.z = 0.25548036184093635;
+    } // this.camera.lookAt(new THREE.Vector3(2,0,-2))
+
 
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -48754,6 +48765,8 @@ var Anime = /*#__PURE__*/function () {
     this.mainLight = mainLight;
     this.mobileFloorMesh = mobileFloorMesh;
     this.circularMesh = circularMesh;
+    this.rotCirc = document.querySelector('.rot-circ-outer');
+    this.rotCircPi = Math.PI / 4;
 
     if (!this.mobile) {
       this.mirror = mirror;
@@ -48798,11 +48811,14 @@ var Anime = /*#__PURE__*/function () {
     this.speed = 0;
     this.oldSnapTo = 2;
     this.fogColor = "#c81cf3";
-    this.projFogColors = ["#1af76e", "#000000", "#fffb22", "#3cff22"];
+    this.projFogColors = ["#ffe600", "#000000", "#0099ff", "#b700ff"];
+    this.projFogColors = ["#1af76e", "#000000", "#fffb22", "#b700ff"];
     this.videoMaterials = videoMaterials;
     this.totalPi = Math.PI / 4;
     this.rayMouseDown = false;
     this.oldPi = 0;
+    this.cursorOnScreen = false;
+    this.oldCursorOnScreen = false;
     this.initSec1();
     this.rotInf();
   }
@@ -48834,8 +48850,8 @@ var Anime = /*#__PURE__*/function () {
       window.addEventListener(this.mobile ? 'touchend' : 'mouseup', this.mouseUpFunc);
 
       if (!this.mobile) {
-        window.addEventListener('mousemove', this.mouseMoveFunc, false);
         window.addEventListener('keypress', this.keyPressFunc, false);
+        window.addEventListener('mousemove', this.mouseMoveFunc, false);
         window.addEventListener("resize", this.resizeFunc, false);
       }
     }
@@ -48875,6 +48891,8 @@ var Anime = /*#__PURE__*/function () {
   }, {
     key: "onMouseMove",
     value: function onMouseMove(event) {
+      this.pointer.x = (this.mobile ? event.touches[0].clientX : event.clientX) / window.innerWidth * 2 - 1;
+      this.pointer.y = -((this.mobile ? event.touches[0].clientY : event.clientY) / window.innerHeight) * 2 + 1;
       this.mouse.x = event.clientX - this.windowHalf.x;
       this.mouse.y = event.clientY - this.windowHalf.x;
     }
@@ -48909,9 +48927,8 @@ var Anime = /*#__PURE__*/function () {
       });
     }
   }, {
-    key: "rayFunc",
-    value: function rayFunc() {
-      // console.log('ray func')
+    key: "rayFuncMobile",
+    value: function rayFuncMobile() {
       this.raycaster.setFromCamera(this.pointer, this.camera);
       var intersects = this.raycaster.intersectObjects(this.scene.children);
 
@@ -48922,6 +48939,36 @@ var Anime = /*#__PURE__*/function () {
           return;
         }
       }
+    }
+  }, {
+    key: "rayFuncLaptop",
+    value: function rayFuncLaptop() {
+      this.raycaster.setFromCamera(this.pointer, this.camera);
+      var intersects = this.raycaster.intersectObjects(this.scene.children);
+
+      for (var i = 0; i < intersects.length; i++) {
+        if (intersects[i].object.name == 'screen') {
+          this.cursorOnScreen = true;
+          break;
+        } else {
+          this.cursorOnScreen = false;
+        }
+      }
+
+      if (this.oldCursorOnScreen != this.cursorOnScreen) {
+        if (this.cursorOnScreen) {
+          document.body.style.cursor = 'pointer';
+        } else {
+          document.body.style.cursor = 'default';
+        }
+      }
+
+      if (this.cursorOnScreen && this.rayMouseDown) {
+        this.options.changeSection(1);
+        this.goToSection(1);
+      }
+
+      this.oldCursorOnScreen = this.cursorOnScreen;
     }
   }, {
     key: "absDist",
@@ -49036,6 +49083,20 @@ var Anime = /*#__PURE__*/function () {
           }
         }
       });
+      this.rotateCirc((Math.PI / 2.3 + num * (Math.PI / 2)) * (180 / Math.PI));
+    }
+  }, {
+    key: "rotateCirc",
+    value: function rotateCirc(deg) {
+      if (this.circRotAnime) {
+        this.circRotAnime.kill();
+      }
+
+      this.circRotAnime = _gsap.default.to(this.rotCirc, {
+        rotate: deg,
+        duration: 2.5,
+        ease: "power4.out"
+      });
     }
   }, {
     key: "stopRotInf",
@@ -49123,6 +49184,8 @@ var Anime = /*#__PURE__*/function () {
         this.mouseX = evt.clientX;
         this.mouseY = evt.clientY;
       }
+
+      document.body.style.cursor = 'grabbing';
     }
   }, {
     key: "rotateUp",
@@ -49133,6 +49196,7 @@ var Anime = /*#__PURE__*/function () {
 
       this.mouseDown = false;
       this.snapToScreen(false);
+      document.body.style.cursor = 'grab';
     }
   }, {
     key: "goToSection",
@@ -49153,17 +49217,21 @@ var Anime = /*#__PURE__*/function () {
       if (this.sectionMap[0].start) {
         this.rayMouseDown = false;
         this.removeSec1Listeners();
+        document.body.style.cursor = 'default';
+        this.cursorOnScreen = false;
       }
 
       if (to == 0) {
         this.goToHome();
         this.currentSection = 0;
+        document.body.style.cursor = 'default';
       } else if (to == 1) {
         this.goToProjects();
         this.currentSection = 1;
       } else if (to == 2) {
         this.goToAbout();
         this.currentSection = 2;
+        document.body.style.cursor = 'default';
       }
     }
   }, {
@@ -49249,16 +49317,16 @@ var Anime = /*#__PURE__*/function () {
           }
         });
         this.homeAnime.to(this.camera.position, {
-          x: 1.857694276842902,
-          y: 4.960754567944053,
-          z: 3.728480970069918,
+          x: this.mobile ? -0.8869828944363806 : 1.857694276842902,
+          y: this.mobile ? 2.572591503477464 : 4.960754567944053,
+          z: this.mobile ? 1.7120534479976164 : 3.728480970069918,
           duration: 2 * timer,
           delay: -2 * timer
         });
         this.homeAnime.to(this.camera.rotation, {
-          x: -0.6132813005274419,
-          z: 0.25548036184093635,
-          y: this.mobile ? 0.5 : 0.3006405553572554,
+          x: this.mobile ? -0.4645205390377041 : -0.6132813005274419,
+          z: this.mobile ? 0.12771715085610133 : 0.25548036184093635,
+          y: this.mobile ? 0.259164209172283 : 0.3006405553572554,
           duration: timer,
           delay: -(2 * timer)
         });
@@ -49277,6 +49345,7 @@ var Anime = /*#__PURE__*/function () {
 
             _this4.snapToScreeSpec();
 
+            document.body.style.cursor = 'grab';
             _this4.currentSection = 1;
           }
         });
@@ -49438,6 +49507,7 @@ var Anime = /*#__PURE__*/function () {
       }
 
       this.dir = this.pi > 0 ? true : false;
+      this.rotCircPi += this.pi;
       this.moveToScreen(this.pi);
     }
   }, {
@@ -49463,6 +49533,7 @@ var Anime = /*#__PURE__*/function () {
           _this5.camera.position.x = x;
           _this5.camera.position.z = z;
           _this5.camera.rotation.y = _this5.totalPi;
+          _this5.rotCirc.style.transform = "rotate(".concat(_this5.totalPi * 180 / Math.PI, "deg)");
         },
         duration: this.mobile ? dur ? 1.3 : 1 : 0.6
       });
@@ -49492,8 +49563,14 @@ var Anime = /*#__PURE__*/function () {
         this.mouseCameraMovement();
       }
 
-      if (this.currentSection == 0 && !this.sectionMap[0].start && this.rayMouseDown) {
-        this.rayFunc();
+      if (this.currentSection == 0 && !this.sectionMap[0].start) {
+        if (this.mobile) {
+          if (this.rayMouseDown) {
+            this.rayFuncMobile();
+          }
+        } else {
+          this.rayFuncLaptop();
+        }
       }
 
       if (this.currentSection == 1) {
@@ -49551,11 +49628,12 @@ var Content = /*#__PURE__*/function () {
 
     this.masterContainer = document.querySelector(".container");
     this.sections = document.querySelectorAll(".content > div");
-    this.projectContainers = document.querySelectorAll(".second > div");
+    this.projectContainers = document.querySelectorAll(".second > .proj");
     this.navBtns = document.querySelectorAll('.nav-cont > div');
     this.socialsBtns = document.querySelectorAll('.socials > div');
     this.mobile = mobile;
     this.camera = camera;
+    this.hintContainer = this.mobile ? document.querySelector('.hint-mobile > p') : document.querySelector('.hint');
     this.mainPercent = 80;
 
     if (this.mobile) {
@@ -49614,6 +49692,10 @@ var Content = /*#__PURE__*/function () {
       this.sections[this.currentSection].classList.add('hide-section');
       this.goToSectionAnime(to);
       this.currentSection = to;
+
+      if (this.currentSection != 1) {
+        this.hideHint();
+      }
     }
   }, {
     key: "showSection",
@@ -49625,6 +49707,45 @@ var Content = /*#__PURE__*/function () {
       });
 
       this.sections[sec].classList.remove('hide-section');
+
+      if (this.currentSection == 1) {
+        this.showHint();
+      }
+    }
+  }, {
+    key: "showHint",
+    value: function showHint() {
+      _gsap.default.to(this.hintContainer, {
+        opacity: 1
+      });
+
+      if (this.blowAnime) {
+        this.blowAnime.kill();
+      }
+
+      this.blowAnime = _gsap.default.timeline({
+        repeat: 8
+      });
+      this.blowAnime.to(this.hintContainer, {
+        scale: 1.3,
+        duration: 1
+      });
+      this.blowAnime.to(this.hintContainer, {
+        scale: 1,
+        duration: 1
+      });
+    }
+  }, {
+    key: "hideHint",
+    value: function hideHint() {
+      if (this.blowAnime) {
+        this.blowAnime.kill();
+      }
+
+      _gsap.default.to(this.hintContainer, {
+        scale: 1,
+        opacity: 0
+      });
     }
   }, {
     key: "lineAnimeStart",
@@ -49722,6 +49843,11 @@ var Content = /*#__PURE__*/function () {
 
         if (window.innerWidth < 990 && this.mainPercent != 65) {
           this.mainPercent = 65;
+          this.animateNav(this.currentSection);
+        }
+
+        if (window.innerWidth < 900 && this.mainPercent != 50) {
+          this.mainPercent = 50;
           this.animateNav(this.currentSection);
         }
 
@@ -50081,7 +50207,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "39991" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "46417" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

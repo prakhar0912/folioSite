@@ -5,11 +5,12 @@ class Content {
     constructor({ goToSection, camera, mobile }) {
         this.masterContainer = document.querySelector(".container")
         this.sections = document.querySelectorAll(".content > div")
-        this.projectContainers = document.querySelectorAll(".second > div")
+        this.projectContainers = document.querySelectorAll(".second > .proj")
         this.navBtns = document.querySelectorAll('.nav-cont > div')
         this.socialsBtns = document.querySelectorAll('.socials > div')
         this.mobile = mobile
         this.camera = camera
+        this.hintContainer = this.mobile ? document.querySelector('.hint-mobile > p') : document.querySelector('.hint')
         this.mainPercent = 80
         if (this.mobile) {
             this.mainPercent = 50
@@ -20,7 +21,6 @@ class Content {
         this.goToSectionAnime = goToSection
         this.contentAnimations()
         this.animateNav(0)
-
     }
 
     removeProject() {
@@ -69,6 +69,9 @@ class Content {
         this.sections[this.currentSection].classList.add('hide-section')
         this.goToSectionAnime(to)
         this.currentSection = to
+        if(this.currentSection != 1){
+            this.hideHint()
+        }
     }
 
     showSection(sec){
@@ -81,6 +84,45 @@ class Content {
             }    
         )
         this.sections[sec].classList.remove('hide-section')
+        if(this.currentSection == 1){
+            this.showHint()
+        }
+    }
+
+    showHint(){
+        gsap.to(this.hintContainer, 
+            {
+                opacity: 1
+            }    
+        )
+        if(this.blowAnime){
+            this.blowAnime.kill()
+        }
+        this.blowAnime = gsap.timeline({repeat: 8})
+        this.blowAnime.to(this.hintContainer,
+            {
+                scale: 1.3,
+                duration: 1
+            }
+        )
+        this.blowAnime.to(this.hintContainer,
+            {
+                scale: 1,
+                duration: 1
+            }
+        )
+    }
+
+    hideHint(){
+        if(this.blowAnime){
+            this.blowAnime.kill()
+        }
+        gsap.to(this.hintContainer, 
+            {
+                scale: 1,
+                opacity: 0
+            }    
+        )
     }
 
     lineAnimeStart(el, dir = 'b') {
@@ -182,6 +224,10 @@ class Content {
             }
             if (window.innerWidth < 990 && this.mainPercent != 65) {
                 this.mainPercent = 65
+                this.animateNav(this.currentSection)
+            }
+            if (window.innerWidth < 900 && this.mainPercent != 50) {
+                this.mainPercent = 50
                 this.animateNav(this.currentSection)
             }
             if (window.innerWidth > 1450 && this.mainPercent != 80) {
