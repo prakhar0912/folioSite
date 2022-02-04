@@ -42923,7 +42923,7 @@ var Objects = /*#__PURE__*/function () {
       }
 
       var video = document.querySelector("#video".concat(videoNum + 1));
-      video.addEventListener('canplay', function () {
+      video.addEventListener('loadedmetadata', function () {
         console.log(videoNum);
       });
       video.play();
