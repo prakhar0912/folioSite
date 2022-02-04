@@ -50104,8 +50104,8 @@ function iOS() {
   || navigator.userAgent.includes("Mac") && "ontouchend" in document;
 }
 
-console.log(iOS);
-alert(window.navigator.hardwareConcurrency);
+console.log(iOS); // alert(window.navigator.hardwareConcurrency)
+
 var mobile = mobileDevice;
 var orbital = false;
 var shadows = true;

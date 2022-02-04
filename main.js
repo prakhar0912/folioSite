@@ -38,7 +38,7 @@ function iOS() {
 
 console.log(iOS)
 
-alert(window.navigator.hardwareConcurrency)
+// alert(window.navigator.hardwareConcurrency)
 
 
 
