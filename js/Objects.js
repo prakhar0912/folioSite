@@ -355,7 +355,7 @@ class Objects {
             geometry = new THREE.CylinderBufferGeometry(outerRadius, outerRadius, 2, 32, 32, true, (videoNum * (Math.PI / 2)), (Math.PI / 2) - offset)
         }
         let video = document.querySelector(`#video${videoNum + 1}`);
-        video.addEventListener('canplaythrough', () => {
+        video.addEventListener('canplay', () => {
             console.log(videoNum)
         })
 
