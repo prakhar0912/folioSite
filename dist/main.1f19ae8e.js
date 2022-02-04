@@ -42923,9 +42923,11 @@ var Objects = /*#__PURE__*/function () {
       }
 
       var video = document.querySelector("#video".concat(videoNum + 1));
-      video.addEventListener('loadedmetadata', function () {
+
+      video.onloadedmetadata = function () {
         console.log(videoNum);
-      });
+      };
+
       video.play();
       var texture = new THREE.VideoTexture(video);
       texture.wrapS = THREE.RepeatWrapping; // texture.wrapT = THREE.RepeatWrapping;
