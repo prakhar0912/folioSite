@@ -114,8 +114,9 @@ class Anime {
 
         window.addEventListener(this.mobile ? 'touchstart' : 'mousedown', this.mouseDownFunc)
         window.addEventListener(this.mobile ? 'touchend' : 'mouseup', this.mouseUpFunc)
+        window.addEventListener('keypress', this.keyPressFunc, false);
+
         if (!this.mobile) {
-            window.addEventListener('keypress', this.keyPressFunc, false);
             window.addEventListener('mousemove', this.mouseMoveFunc, false);
             window.addEventListener("resize", this.resizeFunc, false);
         }
@@ -522,9 +523,9 @@ class Anime {
             )
             this.homeAnime.to(this.camera.position,
                 {
-                    x: this.mobile ? -0.8869828944363806 : 1.857694276842902,
-                    y: this.mobile ? 2.572591503477464 : 4.960754567944053,
-                    z: this.mobile ? 1.7120534479976164 : 3.728480970069918,
+                    x: this.mobile ? -1.4721604622273015 : 1.857694276842902,
+                    y: this.mobile ? 1.9287862762270516 : 4.960754567944053,
+                    z: this.mobile ? 1.510447495458987 : 3.728480970069918,
                     duration: 2 * timer,
                     delay: -2 * timer
                 }
@@ -532,9 +533,9 @@ class Anime {
 
             this.homeAnime.to(this.camera.rotation,
                 {
-                    x: this.mobile ? -0.4645205390377041: -0.6132813005274419,
-                    z: this.mobile ? 0.12771715085610133: 0.25548036184093635,
-                    y: this.mobile ? 0.259164209172283: 0.3006405553572554,
+                    x: this.mobile ? -0.3688849617081898 : -0.6132813005274419,
+                    y: this.mobile ? 0.045607583433491 : 0.3006405553572554,
+                    z: this.mobile ? 0.017623085925540564 : 0.25548036184093635,
                     duration: timer,
                     delay: -(2 * timer),
                 }

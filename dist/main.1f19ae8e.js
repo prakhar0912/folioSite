@@ -38366,12 +38366,15 @@ var ThreeInit = /*#__PURE__*/function () {
     this.camera = new THREE.PerspectiveCamera(this.mobile ? 85 : 65, this.aspect, 0.1, 1000);
 
     if (this.mobile) {
-      this.camera.position.x = -0.4869828944363806;
-      this.camera.position.y = 2.572591503477464;
-      this.camera.position.z = 1.7120534479976164;
-      this.camera.rotation.x = -0.4645205390377041;
-      this.camera.rotation.y = 0.259164209172283;
-      this.camera.rotation.z = 0.12771715085610133;
+      // this.camera.position.x = -0.4869828944363806
+      // this.camera.position.y = 2.572591503477464
+      // this.camera.position.z = 1.7120534479976164
+      this.camera.position.set(-1.5721604622273015, 1.9287862762270516, 1.510447495458987); // this.camera.position.set(-6.326624865856524, 1.7389372627866808, 2.7991435616245637)
+      // this.camera.rotation.x = -0.4645205390377041
+      // this.camera.rotation.y = 0.259164209172283
+      // this.camera.rotation.z = 0.12771715085610133
+
+      this.camera.rotation.set(-0.3688849617081898, 0.045607583433491, 0.017623085925540564); // this.camera.rotation.set(-0.42892492609844635, -0.8208736921396154, -0.3229264624478402)
     } else {
       this.camera.position.x = 1.857694276842902;
       this.camera.position.y = 4.960754567944053;
@@ -42920,6 +42923,9 @@ var Objects = /*#__PURE__*/function () {
       }
 
       var video = document.querySelector("#video".concat(videoNum + 1));
+      video.addEventListener('loadeddata', function () {
+        console.log(videoNum);
+      });
       video.play();
       var texture = new THREE.VideoTexture(video);
       texture.wrapS = THREE.RepeatWrapping; // texture.wrapT = THREE.RepeatWrapping;
@@ -43066,6 +43072,7 @@ var Objects = /*#__PURE__*/function () {
       }
 
       this.scene.add(model);
+      console.log(i, j);
     }
   }]);
 
@@ -48847,9 +48854,9 @@ var Anime = /*#__PURE__*/function () {
       this.resizeFunc = this.resize.bind(this);
       window.addEventListener(this.mobile ? 'touchstart' : 'mousedown', this.mouseDownFunc);
       window.addEventListener(this.mobile ? 'touchend' : 'mouseup', this.mouseUpFunc);
+      window.addEventListener('keypress', this.keyPressFunc, false);
 
       if (!this.mobile) {
-        window.addEventListener('keypress', this.keyPressFunc, false);
         window.addEventListener('mousemove', this.mouseMoveFunc, false);
         window.addEventListener("resize", this.resizeFunc, false);
       }
@@ -49316,16 +49323,16 @@ var Anime = /*#__PURE__*/function () {
           }
         });
         this.homeAnime.to(this.camera.position, {
-          x: this.mobile ? -0.8869828944363806 : 1.857694276842902,
-          y: this.mobile ? 2.572591503477464 : 4.960754567944053,
-          z: this.mobile ? 1.7120534479976164 : 3.728480970069918,
+          x: this.mobile ? -1.4721604622273015 : 1.857694276842902,
+          y: this.mobile ? 1.9287862762270516 : 4.960754567944053,
+          z: this.mobile ? 1.510447495458987 : 3.728480970069918,
           duration: 2 * timer,
           delay: -2 * timer
         });
         this.homeAnime.to(this.camera.rotation, {
-          x: this.mobile ? -0.4645205390377041 : -0.6132813005274419,
-          z: this.mobile ? 0.12771715085610133 : 0.25548036184093635,
-          y: this.mobile ? 0.259164209172283 : 0.3006405553572554,
+          x: this.mobile ? -0.3688849617081898 : -0.6132813005274419,
+          y: this.mobile ? 0.045607583433491 : 0.3006405553572554,
+          z: this.mobile ? 0.017623085925540564 : 0.25548036184093635,
           duration: timer,
           delay: -(2 * timer)
         });
@@ -49721,12 +49728,14 @@ var Content = /*#__PURE__*/function () {
   }, {
     key: "showSection",
     value: function showSection(sec) {
-      _gsap.default.fromTo(this.sections[sec], {
-        opacity: 0
-      }, {
-        opacity: 1
-      });
-
+      // gsap.fromTo(this.sections[sec],
+      //     {
+      //         opacity: 0,
+      //     },
+      //     {
+      //         opacity: 1,
+      //     }
+      // )
       this.sections[sec].classList.remove('hide-section');
 
       if (this.currentSection == 1) {
@@ -49808,10 +49817,13 @@ var Content = /*#__PURE__*/function () {
 
       document.querySelectorAll('.line-anime').forEach(function (el, i) {
         el.addEventListener('mouseenter', function () {
-          // if (this.nextAnime) {
-          //     this.nextAnime.kill()
-          // }
-          _this2.lineAnimeStart(el, 'f');
+          if (_this2.nextAnime && _this2.nextAnime.isActive()) {
+            _this2.nextAnime.kill();
+
+            _this2.lineAnimeEnd(el);
+          } else {
+            _this2.lineAnimeStart(el, 'f');
+          }
         }); // el.addEventListener('mouseleave', () => {
         //     // if (this.nextAnime) {
         //     //     this.nextAnime.kill()
@@ -49852,8 +49864,13 @@ var Content = /*#__PURE__*/function () {
     key: "resizeFunc",
     value: function resizeFunc() {
       if (this.mobile) {
-        if (this.mainPercent != 50) {
+        if (this.mainPercent != 50 && window.innerWidth > 416) {
           this.mainPercent = 50;
+          this.animateNav(this.currentSection);
+        }
+
+        if (window.innerWidth <= 416 && this.mainPercent != 45) {
+          this.mainPercent = 40;
           this.animateNav(this.currentSection);
         }
       } else {
@@ -50104,7 +50121,7 @@ function iOS() {
   || navigator.userAgent.includes("Mac") && "ontouchend" in document;
 }
 
-console.log(iOS); // alert(window.navigator.hardwareConcurrency)
+console.log(iOS()); // alert(window.navigator.hardwareConcurrency)
 
 var mobile = mobileDevice;
 var orbital = false;

@@ -18,13 +18,18 @@ class ThreeInit {
     this.camera = new THREE.PerspectiveCamera(this.mobile ? 85 : 65, this.aspect, 0.1, 1000);
 
     if (this.mobile) {
-      this.camera.position.x = -0.4869828944363806
-      this.camera.position.y = 2.572591503477464
-      this.camera.position.z = 1.7120534479976164
+      // this.camera.position.x = -0.4869828944363806
+      // this.camera.position.y = 2.572591503477464
+      // this.camera.position.z = 1.7120534479976164
+      this.camera.position.set(-1.5721604622273015, 1.9287862762270516, 1.510447495458987)
+      // this.camera.position.set(-6.326624865856524, 1.7389372627866808, 2.7991435616245637)
 
-      this.camera.rotation.x = -0.4645205390377041
-      this.camera.rotation.y = 0.259164209172283
-      this.camera.rotation.z = 0.12771715085610133
+      // this.camera.rotation.x = -0.4645205390377041
+      // this.camera.rotation.y = 0.259164209172283
+      // this.camera.rotation.z = 0.12771715085610133
+
+      this.camera.rotation.set(-0.3688849617081898, 0.045607583433491, 0.017623085925540564)
+      // this.camera.rotation.set(-0.42892492609844635, -0.8208736921396154, -0.3229264624478402)
     }
     else {
       this.camera.position.x = 1.857694276842902

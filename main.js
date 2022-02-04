@@ -36,7 +36,7 @@ function iOS() {
         || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
 }
 
-console.log(iOS)
+console.log(iOS())
 
 // alert(window.navigator.hardwareConcurrency)
 

@@ -92,14 +92,14 @@ class Content {
     }
 
     showSection(sec) {
-        gsap.fromTo(this.sections[sec],
-            {
-                opacity: 0,
-            },
-            {
-                opacity: 1,
-            }
-        )
+        // gsap.fromTo(this.sections[sec],
+        //     {
+        //         opacity: 0,
+        //     },
+        //     {
+        //         opacity: 1,
+        //     }
+        // )
         this.sections[sec].classList.remove('hide-section')
         if (this.currentSection == 1) {
             this.showHint()
@@ -143,8 +143,9 @@ class Content {
     }
 
     lineAnimeStart(el, dir = 'b') {
-        this.nextAnime = new gsap.timeline({ paused: true })
 
+        this.nextAnime = new gsap.timeline({ paused: true })
+        
         this.nextAnime.fromTo(el.querySelector('.line'),
             {
                 xPercent: 0
@@ -180,10 +181,13 @@ class Content {
     contentAnimations() {
         document.querySelectorAll('.line-anime').forEach((el, i) => {
             el.addEventListener('mouseenter', () => {
-                // if (this.nextAnime) {
-                //     this.nextAnime.kill()
-                // }
-                this.lineAnimeStart(el, 'f')
+                if (this.nextAnime && this.nextAnime.isActive()) {
+                    this.nextAnime.kill()
+                    this.lineAnimeEnd(el)
+                }
+                else{
+                    this.lineAnimeStart(el, 'f')
+                }
             })
             // el.addEventListener('mouseleave', () => {
             //     // if (this.nextAnime) {
@@ -229,8 +233,12 @@ class Content {
 
     resizeFunc() {
         if (this.mobile) {
-            if (this.mainPercent != 50) {
+            if (this.mainPercent != 50 && window.innerWidth > 416) {
                 this.mainPercent = 50
+                this.animateNav(this.currentSection)
+            }
+            if (window.innerWidth <= 416 && this.mainPercent != 45) {
+                this.mainPercent = 40
                 this.animateNav(this.currentSection)
             }
         }
