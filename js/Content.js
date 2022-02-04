@@ -66,39 +66,56 @@ class Content {
     }
 
     moveToSection(to) {
-        this.sections[this.currentSection].classList.add('hide-section')
-        this.goToSectionAnime(to)
-        this.currentSection = to
-        if(this.currentSection != 1){
-            this.hideHint()
+        let option = true
+        if (option) {
+            this.sections[this.currentSection].classList.add('hide-section')
+            this.goToSectionAnime(to)
+            this.currentSection = to
+            if (this.currentSection != 1) {
+                this.hideHint()
+            }
+        }
+        else {
+            gsap.to(this.sections[this.currentSection], {
+                opacity: 0,
+                duration: 0.3,
+                onComplete: () => {
+                    this.sections[this.currentSection].classList.add('hide-section')
+                    this.goToSectionAnime(to)
+                    this.currentSection = to
+                    if (this.currentSection != 1) {
+                        this.hideHint()
+                    }
+                }
+            })
         }
     }
 
-    showSection(sec){
-        gsap.fromTo(this.sections[sec], 
+    showSection(sec) {
+        gsap.fromTo(this.sections[sec],
             {
                 opacity: 0,
             },
             {
                 opacity: 1,
-            }    
+            }
         )
         this.sections[sec].classList.remove('hide-section')
-        if(this.currentSection == 1){
+        if (this.currentSection == 1) {
             this.showHint()
         }
     }
 
-    showHint(){
-        gsap.to(this.hintContainer, 
+    showHint() {
+        gsap.to(this.hintContainer,
             {
                 opacity: 1
-            }    
+            }
         )
-        if(this.blowAnime){
+        if (this.blowAnime) {
             this.blowAnime.kill()
         }
-        this.blowAnime = gsap.timeline({repeat: 8})
+        this.blowAnime = gsap.timeline({ repeat: 8 })
         this.blowAnime.to(this.hintContainer,
             {
                 scale: 1.3,
@@ -113,15 +130,15 @@ class Content {
         )
     }
 
-    hideHint(){
-        if(this.blowAnime){
+    hideHint() {
+        if (this.blowAnime) {
             this.blowAnime.kill()
         }
-        gsap.to(this.hintContainer, 
+        gsap.to(this.hintContainer,
             {
                 scale: 1,
                 opacity: 0
-            }    
+            }
         )
     }
 
@@ -270,7 +287,7 @@ class Content {
         window.addEventListener('resize', this.resizeFunc.bind(this))
 
 
-        if(!this.mobile){
+        if (!this.mobile) {
             this.socialsBtns.forEach(e => {
                 e.addEventListener('mouseenter', () => {
                     this.socialOpen(e)

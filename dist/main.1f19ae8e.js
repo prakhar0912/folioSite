@@ -49689,12 +49689,34 @@ var Content = /*#__PURE__*/function () {
   }, {
     key: "moveToSection",
     value: function moveToSection(to) {
-      this.sections[this.currentSection].classList.add('hide-section');
-      this.goToSectionAnime(to);
-      this.currentSection = to;
+      var _this = this;
 
-      if (this.currentSection != 1) {
-        this.hideHint();
+      var option = true;
+
+      if (option) {
+        this.sections[this.currentSection].classList.add('hide-section');
+        this.goToSectionAnime(to);
+        this.currentSection = to;
+
+        if (this.currentSection != 1) {
+          this.hideHint();
+        }
+      } else {
+        _gsap.default.to(this.sections[this.currentSection], {
+          opacity: 0,
+          duration: 0.3,
+          onComplete: function onComplete() {
+            _this.sections[_this.currentSection].classList.add('hide-section');
+
+            _this.goToSectionAnime(to);
+
+            _this.currentSection = to;
+
+            if (_this.currentSection != 1) {
+              _this.hideHint();
+            }
+          }
+        });
       }
     }
   }, {
@@ -49783,14 +49805,14 @@ var Content = /*#__PURE__*/function () {
   }, {
     key: "contentAnimations",
     value: function contentAnimations() {
-      var _this = this;
+      var _this2 = this;
 
       document.querySelectorAll('.line-anime').forEach(function (el, i) {
         el.addEventListener('mouseenter', function () {
           // if (this.nextAnime) {
           //     this.nextAnime.kill()
           // }
-          _this.lineAnimeStart(el, 'f');
+          _this2.lineAnimeStart(el, 'f');
         }); // el.addEventListener('mouseleave', () => {
         //     // if (this.nextAnime) {
         //     //     this.nextAnime.kill()
@@ -49802,12 +49824,12 @@ var Content = /*#__PURE__*/function () {
   }, {
     key: "animateNav",
     value: function animateNav(i) {
-      var _this2 = this;
+      var _this3 = this;
 
       this.animateNavAnime = _gsap.default.timeline({
         paused: true,
         onComplete: function onComplete() {
-          _this2.navBtns[i].classList.add('active');
+          _this3.navBtns[i].classList.add('active');
         }
       });
 
@@ -49884,17 +49906,17 @@ var Content = /*#__PURE__*/function () {
   }, {
     key: "addEventListeners",
     value: function addEventListeners() {
-      var _this3 = this;
+      var _this4 = this;
 
       this.nextBtns = document.querySelectorAll('.next');
       this.nextBtns.forEach(function (el, i) {
         el.addEventListener('click', function () {
-          _this3.navClick(i + 1);
+          _this4.navClick(i + 1);
         });
       });
       this.navBtns.forEach(function (el, i) {
         el.addEventListener('click', function () {
-          _this3.navClick(i);
+          _this4.navClick(i);
         });
       });
       window.addEventListener('resize', this.resizeFunc.bind(this));
@@ -49902,10 +49924,10 @@ var Content = /*#__PURE__*/function () {
       if (!this.mobile) {
         this.socialsBtns.forEach(function (e) {
           e.addEventListener('mouseenter', function () {
-            _this3.socialOpen(e);
+            _this4.socialOpen(e);
           });
           e.addEventListener('mouseleave', function () {
-            _this3.socialClose(e);
+            _this4.socialClose(e);
           });
         });
       }
