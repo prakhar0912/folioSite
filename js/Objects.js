@@ -358,9 +358,9 @@ class Objects {
         }
         let video = document.querySelector(`#video${videoNum + 1}`);
         video.play()
-        video.oncanplay = function(){
-            console.log(videoNum)
-            video.play()
+        video.oncanplay = function(el){
+            console.log(el)
+            el.target.play()
         }
         
         let texture = new THREE.VideoTexture(video);

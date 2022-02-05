@@ -42927,9 +42927,9 @@ var Objects = /*#__PURE__*/function () {
       var video = document.querySelector("#video".concat(videoNum + 1));
       video.play();
 
-      video.oncanplay = function () {
-        console.log(videoNum);
-        video.play();
+      video.oncanplay = function (el) {
+        console.log(el);
+        el.target.play();
       };
 
       var texture = new THREE.VideoTexture(video);
