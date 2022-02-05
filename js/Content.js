@@ -1,4 +1,8 @@
+import favOn from '../img/fav-on.png'
+import favOff from '../img/fav-off.png'
+
 import gsap from "gsap"
+
 
 
 class Content {
@@ -25,42 +29,58 @@ class Content {
         this.goToSectionAnime = goToSection
         this.contentAnimations()
         this.animateNav(0)
+        this.on = true
+        this.titleAnimate()
     }
 
-    loadedModel(i, j){
-        if(this.loaderAnime){
+    titleAnimate() {
+        setInterval(() => {
+            console.log('here')
+            var link = document.querySelector("link[rel~='icon']");
+            if (!link) {
+                link = document.createElement('link');
+                link.rel = 'icon';
+                document.getElementsByTagName('head')[0].appendChild(link);
+            }
+            link.href = this.on ? favOn : favOff;
+            this.on = !this.on
+        }, 1000)
+    }
+
+    loadedModel(i, j) {
+        if (this.loaderAnime) {
             this.loaderAnime.kill()
         }
-        this.loaderAnime = gsap.to(this.loaderLen, 
+        this.loaderAnime = gsap.to(this.loaderLen,
             {
-                width: `${(this.loaded/19)*(this.mobile ? 90 : 97)}vw`,
+                width: `${(this.loaded / 19) * (this.mobile ? 90 : 97)}vw`,
                 onComplete: () => {
-                    if(this.loaded >= 19){
+                    if (this.loaded >= 19) {
                         this.removeLoader()
                     }
                 }
             }
         )
-        this.loaderNum.innerHTML = Math.round(this.loaded*100/19)
+        this.loaderNum.innerHTML = Math.round(this.loaded * 100 / 19)
         this.loaded++
     }
 
-    removeLoader(){
-        gsap.to('.pretext', 
+    removeLoader() {
+        gsap.to('.pretext',
             {
                 opacity: 0,
                 duration: 0.2,
                 ease: "Power4.in"
-            }    
+            }
         )
-        gsap.to(this.loaderLen, 
+        gsap.to(this.loaderLen,
             {
                 opacity: 0,
                 duration: 0.2,
                 ease: "Power4.in"
-            }    
+            }
         )
-        gsap.to(this.preLoader, 
+        gsap.to(this.preLoader,
             {
                 opacity: 0,
                 duration: 1,
@@ -68,12 +88,12 @@ class Content {
                     this.preLoader.style.display = 'none'
                 },
                 ease: "Power4.in"
-            }    
+            }
         )
         this.loadedAnimations()
     }
 
-    loadedAnimations(){
+    loadedAnimations() {
         document.querySelectorAll('.first > div > .idk > div > h2').forEach((el, i) => {
             gsap.fromTo(el,
                 {
@@ -157,7 +177,7 @@ class Content {
     }
 
     showSection(sec) {
-        if(!this.mobile){
+        if (!this.mobile) {
             gsap.fromTo(this.sections[sec],
                 {
                     opacity: 0,
@@ -212,7 +232,7 @@ class Content {
     lineAnimeStart(el, dir = 'b') {
 
         this.nextAnime = new gsap.timeline({ paused: true })
-        
+
         this.nextAnime.fromTo(el.querySelector('.line'),
             {
                 xPercent: 0
@@ -252,7 +272,7 @@ class Content {
                     this.nextAnime.kill()
                     this.lineAnimeEnd(el)
                 }
-                else{
+                else {
                     this.lineAnimeStart(el, 'f')
                 }
             })

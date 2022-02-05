@@ -49605,13 +49605,21 @@ var Anime = /*#__PURE__*/function () {
 }();
 
 exports.Anime = Anime;
-},{"three":"node_modules/three/build/three.module.js","gsap":"node_modules/gsap/index.js"}],"js/Content.js":[function(require,module,exports) {
+},{"three":"node_modules/three/build/three.module.js","gsap":"node_modules/gsap/index.js"}],"img/fav-on.png":[function(require,module,exports) {
+module.exports = "/fav-on.e3c05def.png";
+},{}],"img/fav-off.png":[function(require,module,exports) {
+module.exports = "/fav-off.f7e55922.png";
+},{}],"js/Content.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Content = void 0;
+
+var _favOn = _interopRequireDefault(require("../img/fav-on.png"));
+
+var _favOff = _interopRequireDefault(require("../img/fav-off.png"));
 
 var _gsap = _interopRequireDefault(require("gsap"));
 
@@ -49655,12 +49663,33 @@ var Content = /*#__PURE__*/function () {
     this.goToSectionAnime = goToSection;
     this.contentAnimations();
     this.animateNav(0);
+    this.on = true;
+    this.titleAnimate();
   }
 
   _createClass(Content, [{
+    key: "titleAnimate",
+    value: function titleAnimate() {
+      var _this = this;
+
+      setInterval(function () {
+        console.log('here');
+        var link = document.querySelector("link[rel~='icon']");
+
+        if (!link) {
+          link = document.createElement('link');
+          link.rel = 'icon';
+          document.getElementsByTagName('head')[0].appendChild(link);
+        }
+
+        link.href = _this.on ? _favOn.default : _favOff.default;
+        _this.on = !_this.on;
+      }, 1000);
+    }
+  }, {
     key: "loadedModel",
     value: function loadedModel(i, j) {
-      var _this = this;
+      var _this2 = this;
 
       if (this.loaderAnime) {
         this.loaderAnime.kill();
@@ -49669,8 +49698,8 @@ var Content = /*#__PURE__*/function () {
       this.loaderAnime = _gsap.default.to(this.loaderLen, {
         width: "".concat(this.loaded / 19 * (this.mobile ? 90 : 97), "vw"),
         onComplete: function onComplete() {
-          if (_this.loaded >= 19) {
-            _this.removeLoader();
+          if (_this2.loaded >= 19) {
+            _this2.removeLoader();
           }
         }
       });
@@ -49680,7 +49709,7 @@ var Content = /*#__PURE__*/function () {
   }, {
     key: "removeLoader",
     value: function removeLoader() {
-      var _this2 = this;
+      var _this3 = this;
 
       _gsap.default.to('.pretext', {
         opacity: 0,
@@ -49698,7 +49727,7 @@ var Content = /*#__PURE__*/function () {
         opacity: 0,
         duration: 1,
         onComplete: function onComplete() {
-          _this2.preLoader.style.display = 'none';
+          _this3.preLoader.style.display = 'none';
         },
         ease: "Power4.in"
       });
@@ -49759,7 +49788,7 @@ var Content = /*#__PURE__*/function () {
   }, {
     key: "moveToSection",
     value: function moveToSection(to) {
-      var _this3 = this;
+      var _this4 = this;
 
       var option = true;
 
@@ -49776,14 +49805,14 @@ var Content = /*#__PURE__*/function () {
           opacity: 0,
           duration: 0.3,
           onComplete: function onComplete() {
-            _this3.sections[_this3.currentSection].classList.add('hide-section');
+            _this4.sections[_this4.currentSection].classList.add('hide-section');
 
-            _this3.goToSectionAnime(to);
+            _this4.goToSectionAnime(to);
 
-            _this3.currentSection = to;
+            _this4.currentSection = to;
 
-            if (_this3.currentSection != 1) {
-              _this3.hideHint();
+            if (_this4.currentSection != 1) {
+              _this4.hideHint();
             }
           }
         });
@@ -49877,16 +49906,16 @@ var Content = /*#__PURE__*/function () {
   }, {
     key: "contentAnimations",
     value: function contentAnimations() {
-      var _this4 = this;
+      var _this5 = this;
 
       document.querySelectorAll('.line-anime').forEach(function (el, i) {
         el.addEventListener('mouseenter', function () {
-          if (_this4.nextAnime && _this4.nextAnime.isActive()) {
-            _this4.nextAnime.kill();
+          if (_this5.nextAnime && _this5.nextAnime.isActive()) {
+            _this5.nextAnime.kill();
 
-            _this4.lineAnimeEnd(el);
+            _this5.lineAnimeEnd(el);
           } else {
-            _this4.lineAnimeStart(el, 'f');
+            _this5.lineAnimeStart(el, 'f');
           }
         }); // el.addEventListener('mouseleave', () => {
         //     // if (this.nextAnime) {
@@ -49899,12 +49928,12 @@ var Content = /*#__PURE__*/function () {
   }, {
     key: "animateNav",
     value: function animateNav(i) {
-      var _this5 = this;
+      var _this6 = this;
 
       this.animateNavAnime = _gsap.default.timeline({
         paused: true,
         onComplete: function onComplete() {
-          _this5.navBtns[i].classList.add('active');
+          _this6.navBtns[i].classList.add('active');
         }
       });
 
@@ -49986,17 +50015,17 @@ var Content = /*#__PURE__*/function () {
   }, {
     key: "addEventListeners",
     value: function addEventListeners() {
-      var _this6 = this;
+      var _this7 = this;
 
       this.nextBtns = document.querySelectorAll('.next');
       this.nextBtns.forEach(function (el, i) {
         el.addEventListener('click', function () {
-          _this6.navClick(1);
+          _this7.navClick(1);
         });
       });
       this.navBtns.forEach(function (el, i) {
         el.addEventListener('click', function () {
-          _this6.navClick(i);
+          _this7.navClick(i);
         });
       });
       window.addEventListener('resize', this.resizeFunc.bind(this));
@@ -50004,10 +50033,10 @@ var Content = /*#__PURE__*/function () {
       if (!this.mobile) {
         this.socialsBtns.forEach(function (e) {
           e.addEventListener('mouseenter', function () {
-            _this6.socialOpen(e);
+            _this7.socialOpen(e);
           });
           e.addEventListener('mouseleave', function () {
-            _this6.socialClose(e);
+            _this7.socialClose(e);
           });
         });
       }
@@ -50018,133 +50047,7 @@ var Content = /*#__PURE__*/function () {
 }();
 
 exports.Content = Content;
-},{"gsap":"node_modules/gsap/index.js"}],"node_modules/three/examples/jsm/libs/stats.module.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var Stats = function () {
-  var mode = 0;
-  var container = document.createElement('div');
-  container.style.cssText = 'position:fixed;top:0;left:0;cursor:pointer;opacity:0.9;z-index:10000';
-  container.addEventListener('click', function (event) {
-    event.preventDefault();
-    showPanel(++mode % container.children.length);
-  }, false); //
-
-  function addPanel(panel) {
-    container.appendChild(panel.dom);
-    return panel;
-  }
-
-  function showPanel(id) {
-    for (var i = 0; i < container.children.length; i++) {
-      container.children[i].style.display = i === id ? 'block' : 'none';
-    }
-
-    mode = id;
-  } //
-
-
-  var beginTime = (performance || Date).now(),
-      prevTime = beginTime,
-      frames = 0;
-  var fpsPanel = addPanel(new Stats.Panel('FPS', '#0ff', '#002'));
-  var msPanel = addPanel(new Stats.Panel('MS', '#0f0', '#020'));
-
-  if (self.performance && self.performance.memory) {
-    var memPanel = addPanel(new Stats.Panel('MB', '#f08', '#201'));
-  }
-
-  showPanel(0);
-  return {
-    REVISION: 16,
-    dom: container,
-    addPanel: addPanel,
-    showPanel: showPanel,
-    begin: function () {
-      beginTime = (performance || Date).now();
-    },
-    end: function () {
-      frames++;
-      var time = (performance || Date).now();
-      msPanel.update(time - beginTime, 200);
-
-      if (time >= prevTime + 1000) {
-        fpsPanel.update(frames * 1000 / (time - prevTime), 100);
-        prevTime = time;
-        frames = 0;
-
-        if (memPanel) {
-          var memory = performance.memory;
-          memPanel.update(memory.usedJSHeapSize / 1048576, memory.jsHeapSizeLimit / 1048576);
-        }
-      }
-
-      return time;
-    },
-    update: function () {
-      beginTime = this.end();
-    },
-    // Backwards Compatibility
-    domElement: container,
-    setMode: showPanel
-  };
-};
-
-Stats.Panel = function (name, fg, bg) {
-  var min = Infinity,
-      max = 0,
-      round = Math.round;
-  var PR = round(window.devicePixelRatio || 1);
-  var WIDTH = 80 * PR,
-      HEIGHT = 48 * PR,
-      TEXT_X = 3 * PR,
-      TEXT_Y = 2 * PR,
-      GRAPH_X = 3 * PR,
-      GRAPH_Y = 15 * PR,
-      GRAPH_WIDTH = 74 * PR,
-      GRAPH_HEIGHT = 30 * PR;
-  var canvas = document.createElement('canvas');
-  canvas.width = WIDTH;
-  canvas.height = HEIGHT;
-  canvas.style.cssText = 'width:80px;height:48px';
-  var context = canvas.getContext('2d');
-  context.font = 'bold ' + 9 * PR + 'px Helvetica,Arial,sans-serif';
-  context.textBaseline = 'top';
-  context.fillStyle = bg;
-  context.fillRect(0, 0, WIDTH, HEIGHT);
-  context.fillStyle = fg;
-  context.fillText(name, TEXT_X, TEXT_Y);
-  context.fillRect(GRAPH_X, GRAPH_Y, GRAPH_WIDTH, GRAPH_HEIGHT);
-  context.fillStyle = bg;
-  context.globalAlpha = 0.9;
-  context.fillRect(GRAPH_X, GRAPH_Y, GRAPH_WIDTH, GRAPH_HEIGHT);
-  return {
-    dom: canvas,
-    update: function (value, maxValue) {
-      min = Math.min(min, value);
-      max = Math.max(max, value);
-      context.fillStyle = bg;
-      context.globalAlpha = 1;
-      context.fillRect(0, 0, WIDTH, GRAPH_Y);
-      context.fillStyle = fg;
-      context.fillText(round(value) + ' ' + name + ' (' + round(min) + '-' + round(max) + ')', TEXT_X, TEXT_Y);
-      context.drawImage(canvas, GRAPH_X + PR, GRAPH_Y, GRAPH_WIDTH - PR, GRAPH_HEIGHT, GRAPH_X, GRAPH_Y, GRAPH_WIDTH - PR, GRAPH_HEIGHT);
-      context.fillRect(GRAPH_X + GRAPH_WIDTH - PR, GRAPH_Y, PR, GRAPH_HEIGHT);
-      context.fillStyle = bg;
-      context.globalAlpha = 0.9;
-      context.fillRect(GRAPH_X + GRAPH_WIDTH - PR, GRAPH_Y, PR, round((1 - value / maxValue) * GRAPH_HEIGHT));
-    }
-  };
-};
-
-var _default = Stats;
-exports.default = _default;
-},{}],"main.js":[function(require,module,exports) {
+},{"../img/fav-on.png":"img/fav-on.png","../img/fav-off.png":"img/fav-off.png","gsap":"node_modules/gsap/index.js"}],"main.js":[function(require,module,exports) {
 "use strict";
 
 var _ThreeInit = require("./js/ThreeInit");
@@ -50155,10 +50058,7 @@ var _Anime = require("./js/Anime");
 
 var _Content = require("./js/Content");
 
-var _stats = _interopRequireDefault(require("three/examples/jsm/libs/stats.module"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
+// import Stats from 'three/examples/jsm/libs/stats.module'
 var mobileAndTabletCheck = function mobileAndTabletCheck() {
   var check = false;
 
@@ -50277,9 +50177,8 @@ var content = new _Content.Content({
   goToSection: function goToSection(from, to) {
     animes.goToSection(from, to);
   }
-});
-var stats = (0, _stats.default)();
-document.body.appendChild(stats.domElement);
+}); // const stats = Stats()
+// document.body.appendChild(stats.domElement)
 
 var animate = function animate() {
   requestAnimationFrame(animate);
@@ -50288,12 +50187,11 @@ var animate = function animate() {
     animes.animate();
   }
 
-  threeInstance.animate();
-  stats.update();
+  threeInstance.animate(); // stats.update()
 };
 
 animate();
-},{"./js/ThreeInit":"js/ThreeInit.js","./js/Objects":"js/Objects.js","./js/Anime":"js/Anime.js","./js/Content":"js/Content.js","three/examples/jsm/libs/stats.module":"node_modules/three/examples/jsm/libs/stats.module.js"}],"../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./js/ThreeInit":"js/ThreeInit.js","./js/Objects":"js/Objects.js","./js/Anime":"js/Anime.js","./js/Content":"js/Content.js"}],"../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -50321,7 +50219,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "39405" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "42367" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
