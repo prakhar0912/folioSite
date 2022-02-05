@@ -49,14 +49,14 @@ class Content {
         gsap.to('.pretext', 
             {
                 opacity: 0,
-                duration: 0.5,
+                duration: 0.2,
                 ease: "Power4.in"
             }    
         )
         gsap.to(this.loaderLen, 
             {
                 opacity: 0,
-                duration: 0.5,
+                duration: 0.2,
                 ease: "Power4.in"
             }    
         )
@@ -70,6 +70,22 @@ class Content {
                 ease: "Power4.in"
             }    
         )
+        this.loadedAnimations()
+    }
+
+    loadedAnimations(){
+        document.querySelectorAll('.first > div > .idk > div > h2').forEach((el, i) => {
+            gsap.fromTo(el,
+                {
+                    yPercent: 100
+                },
+                {
+                    yPercent: 0,
+                    delay: (i) * 0.05
+                }
+            )
+        })
+        this.lineAnimeStart(document.querySelector('.first > div > .line-anime'), 'f')
     }
 
     removeProject() {
@@ -141,14 +157,16 @@ class Content {
     }
 
     showSection(sec) {
-        // gsap.fromTo(this.sections[sec],
-        //     {
-        //         opacity: 0,
-        //     },
-        //     {
-        //         opacity: 1,
-        //     }
-        // )
+        if(!this.mobile){
+            gsap.fromTo(this.sections[sec],
+                {
+                    opacity: 0,
+                },
+                {
+                    opacity: 1,
+                }
+            )
+        }
         this.sections[sec].classList.remove('hide-section')
         if (this.currentSection == 1) {
             this.showHint()
@@ -331,7 +349,7 @@ class Content {
         this.nextBtns = document.querySelectorAll('.next')
         this.nextBtns.forEach((el, i) => {
             el.addEventListener('click', () => {
-                this.navClick(i + 1)
+                this.navClick(1)
             })
         })
 

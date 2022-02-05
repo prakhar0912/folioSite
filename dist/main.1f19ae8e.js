@@ -48817,7 +48817,7 @@ var Anime = /*#__PURE__*/function () {
     this.oldSnapTo = 2;
     this.fogColor = "#c81cf3";
     this.projFogColors = ["#ffe600", "#000000", "#0099ff", "#b700ff"];
-    this.projFogColors = ["#1af76e", "#000000", "#fffb22", "#b700ff"];
+    this.projFogColors = ["#000000", "#1af76e", "#fffb22", "#b700ff"];
     this.videoMaterials = videoMaterials;
     this.totalPi = Math.PI / 4;
     this.rayMouseDown = false;
@@ -49684,13 +49684,13 @@ var Content = /*#__PURE__*/function () {
 
       _gsap.default.to('.pretext', {
         opacity: 0,
-        duration: 0.5,
+        duration: 0.2,
         ease: "Power4.in"
       });
 
       _gsap.default.to(this.loaderLen, {
         opacity: 0,
-        duration: 0.5,
+        duration: 0.2,
         ease: "Power4.in"
       });
 
@@ -49702,6 +49702,21 @@ var Content = /*#__PURE__*/function () {
         },
         ease: "Power4.in"
       });
+
+      this.loadedAnimations();
+    }
+  }, {
+    key: "loadedAnimations",
+    value: function loadedAnimations() {
+      document.querySelectorAll('.first > div > .idk > div > h2').forEach(function (el, i) {
+        _gsap.default.fromTo(el, {
+          yPercent: 100
+        }, {
+          yPercent: 0,
+          delay: i * 0.05
+        });
+      });
+      this.lineAnimeStart(document.querySelector('.first > div > .line-anime'), 'f');
     }
   }, {
     key: "removeProject",
@@ -49777,14 +49792,14 @@ var Content = /*#__PURE__*/function () {
   }, {
     key: "showSection",
     value: function showSection(sec) {
-      // gsap.fromTo(this.sections[sec],
-      //     {
-      //         opacity: 0,
-      //     },
-      //     {
-      //         opacity: 1,
-      //     }
-      // )
+      if (!this.mobile) {
+        _gsap.default.fromTo(this.sections[sec], {
+          opacity: 0
+        }, {
+          opacity: 1
+        });
+      }
+
       this.sections[sec].classList.remove('hide-section');
 
       if (this.currentSection == 1) {
@@ -49976,7 +49991,7 @@ var Content = /*#__PURE__*/function () {
       this.nextBtns = document.querySelectorAll('.next');
       this.nextBtns.forEach(function (el, i) {
         el.addEventListener('click', function () {
-          _this6.navClick(i + 1);
+          _this6.navClick(1);
         });
       });
       this.navBtns.forEach(function (el, i) {

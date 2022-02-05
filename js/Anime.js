@@ -75,7 +75,7 @@ class Anime {
 
         this.fogColor = "#c81cf3"
         this.projFogColors = ["#ffe600", "#000000", "#0099ff", "#b700ff",]
-        this.projFogColors = ["#1af76e", "#000000", "#fffb22", "#b700ff",]
+        this.projFogColors = ["#000000","#1af76e" , "#fffb22", "#b700ff",]
 
         this.videoMaterials = videoMaterials
         this.totalPi = Math.PI / 4
