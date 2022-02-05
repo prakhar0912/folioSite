@@ -2,7 +2,7 @@ import { ThreeInit } from './js/ThreeInit'
 import { Objects } from './js/Objects'
 import { Anime } from './js/Anime'
 import { Content } from './js/Content'
-// import Stats from 'three/examples/jsm/libs/stats.module'
+import Stats from 'three/examples/jsm/libs/stats.module'
 
 
 for (let i = 0; i < 4; i++) {
@@ -41,13 +41,14 @@ function iOS() {
         || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
 }
 
-console.log(iOS())
+
 
 // alert(window.navigator.hardwareConcurrency)
 
 
 
 let mobile = mobileDevice
+
 
 let orbital = false
 let shadows = true
@@ -62,6 +63,7 @@ let bufferGeo = false //for mobile not for laptop
 
 let snappingAnime = true
 let stickToCenterAnime = false
+let pixelRatio = window.devicePixelRatio
 
 //Might need to add a max speed for snappingAnime
 
@@ -77,11 +79,17 @@ if (mobile) {
     noScreenShader = false
     snappingAnime = false
     stickToCenterAnime = false
+    pixelRatio = 1.5
+}
+
+if(mobile && iOS()){
+    pixelRatio = window.devicePixelRatio
 }
 
 const threeInstance = new ThreeInit({
     orbital: orbital,
     shadows: shadows,
+    pixelRatio,
     specialBackground,
     mobile,
     noBackground,
@@ -148,8 +156,8 @@ const content = new Content({
 })
 
 
-// const stats = Stats()
-// document.body.appendChild(stats.domElement)
+const stats = Stats()
+document.body.appendChild(stats.domElement)
 
 const animate = () => {
     requestAnimationFrame(animate);
@@ -157,7 +165,7 @@ const animate = () => {
         animes.animate()
     }
     threeInstance.animate()
-    // stats.update()
+    stats.update()
 }
 
 animate()

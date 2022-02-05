@@ -6,7 +6,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass'
 
 class ThreeInit {
-  constructor({ orbital, shadows, specialBackground, noBackground, noFog, mobile }) {
+  constructor({ orbital, shadows, pixelRatio, specialBackground, noBackground, noFog, mobile }) {
     this.container = document.querySelector(".three")
     this.shadows = shadows
     this.scene = new THREE.Scene();
@@ -46,9 +46,9 @@ class ThreeInit {
       powerPreference: 'high-performance',
       alpha: true
     });
-    this.mobilePixelRatio = 1.5
+    this.mobilePixelRatio = pixelRatio
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight)
-    this.renderer.setPixelRatio(this.mobile ? this.mobilePixelRatio : window.devicePixelRatio);
+    this.renderer.setPixelRatio(this.mobilePixelRatio);
 
     this.renderer.physicallyCorrectLights = true
     this.renderer.toneMapping = THREE.NoToneMapping
