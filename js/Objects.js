@@ -358,6 +358,10 @@ class Objects {
         }
         let video = document.querySelector(`#video${videoNum + 1}`);
         video.play()
+        video.oncanplay = function(){
+            console.log(videoNum)
+            video.play()
+        }
         
         let texture = new THREE.VideoTexture(video);
         texture.wrapS = THREE.RepeatWrapping;

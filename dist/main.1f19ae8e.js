@@ -42926,6 +42926,12 @@ var Objects = /*#__PURE__*/function () {
 
       var video = document.querySelector("#video".concat(videoNum + 1));
       video.play();
+
+      video.oncanplay = function () {
+        console.log(videoNum);
+        video.play();
+      };
+
       var texture = new THREE.VideoTexture(video);
       texture.wrapS = THREE.RepeatWrapping; // texture.wrapT = THREE.RepeatWrapping;
 
@@ -49673,7 +49679,6 @@ var Content = /*#__PURE__*/function () {
       var _this = this;
 
       setInterval(function () {
-        console.log('here');
         var link = document.querySelector("link[rel~='icon']");
 
         if (!link) {
@@ -50059,6 +50064,11 @@ var _Anime = require("./js/Anime");
 var _Content = require("./js/Content");
 
 // import Stats from 'three/examples/jsm/libs/stats.module'
+for (var i = 0; i < 4; i++) {
+  var video = document.querySelector("#video".concat(i + 1));
+  video.play();
+}
+
 var mobileAndTabletCheck = function mobileAndTabletCheck() {
   var check = false;
 
@@ -50219,7 +50229,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "42367" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "37691" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

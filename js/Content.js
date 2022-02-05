@@ -35,7 +35,6 @@ class Content {
 
     titleAnimate() {
         setInterval(() => {
-            console.log('here')
             var link = document.querySelector("link[rel~='icon']");
             if (!link) {
                 link = document.createElement('link');
