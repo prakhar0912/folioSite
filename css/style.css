@@ -269,8 +269,8 @@ h2 {
 
 .rot-outer {
     position: relative;
-    height: 80px;
-    width: 80px;
+    height: 70px;
+    width: 70px;
     border-radius: 100%;
     border: 1px rgba(255, 255, 255, 0.616) solid;
     display: grid;
@@ -769,8 +769,8 @@ h2 {
     }
 
     .rot-outer {
-        height: 60px;
-        width: 60px;
+        height: 50px;
+        width: 50px;
     }
 
     .hint {

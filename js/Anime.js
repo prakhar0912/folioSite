@@ -114,9 +114,9 @@ class Anime {
 
         window.addEventListener(this.mobile ? 'touchstart' : 'mousedown', this.mouseDownFunc)
         window.addEventListener(this.mobile ? 'touchend' : 'mouseup', this.mouseUpFunc)
-        window.addEventListener('keypress', this.keyPressFunc, false);
 
         if (!this.mobile) {
+            window.addEventListener('keypress', this.keyPressFunc, false);
             window.addEventListener('mousemove', this.mouseMoveFunc, false);
             window.addEventListener("resize", this.resizeFunc, false);
         }
@@ -433,6 +433,7 @@ class Anime {
 
         if (this.sectionMap[1].start) {
             this.removeDragListeners()
+            gsap.to(this.rotCirc, {width: "80%"})
         }
 
         if (this.sectionMap[0].start) {
@@ -449,6 +450,7 @@ class Anime {
         }
         else if (to == 1) {
             this.goToProjects()
+            gsap.to(this.rotCirc, {width: this.mobile ? "150%" : "140%"})
             this.currentSection = 1
         }
         else if (to == 2) {

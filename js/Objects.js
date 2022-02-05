@@ -359,7 +359,6 @@ class Objects {
         let video = document.querySelector(`#video${videoNum + 1}`);
         video.play()
         video.oncanplay = function(el){
-            console.log(el)
             el.target.play()
         }
         

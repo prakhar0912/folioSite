@@ -2,7 +2,7 @@ import { ThreeInit } from './js/ThreeInit'
 import { Objects } from './js/Objects'
 import { Anime } from './js/Anime'
 import { Content } from './js/Content'
-import Stats from 'three/examples/jsm/libs/stats.module'
+// import Stats from 'three/examples/jsm/libs/stats.module'
 
 
 for (let i = 0; i < 4; i++) {
@@ -156,8 +156,8 @@ const content = new Content({
 })
 
 
-const stats = Stats()
-document.body.appendChild(stats.domElement)
+// const stats = Stats()
+// document.body.appendChild(stats.domElement)
 
 const animate = () => {
     requestAnimationFrame(animate);
@@ -165,7 +165,7 @@ const animate = () => {
         animes.animate()
     }
     threeInstance.animate()
-    stats.update()
+    // stats.update()
 }
 
 animate()
