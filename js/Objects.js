@@ -1,14 +1,13 @@
 import * as THREE from "three";
 import { Reflector } from './Reflector'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { ReflectorMaterial } from "./spec/ReflectorMaterial";
-import { Floor } from './Floor'
-import model1 from '../assets/person1.glb'
-import model2 from '../assets/person2.glb'
-import model3 from '../assets/person3.glb'
-import model4 from '../assets/person4.glb'
-import model5 from '../assets/person5.glb'
-import model6 from '../assets/person6.glb'
+
+const model1 = new URL('../assets/person1.glb', import.meta.url)
+const model2 = new URL('../assets/person2(rot).glb', import.meta.url)
+const model3 = new URL('../assets/person3(rot).glb', import.meta.url)
+const model4 = new URL('../assets/person4(rot2).glb', import.meta.url)
+const model5 = new URL('../assets/person5(rot).glb', import.meta.url)
+const model6 = new URL('../assets/person7(rot).glb', import.meta.url)
 
 
 
@@ -414,7 +413,7 @@ class Objects {
         }
         this.modelsToLoad = [model1, model2, model3, model4, model5, model6]
         this.modelsToLoad.forEach(ele => {
-            loader.load(ele, this.load.bind(this), undefined, function (error) {
+            loader.load(ele.pathname, this.load.bind(this), undefined, function (error) {
                 console.error(error);
             });
         })

@@ -1,5 +1,5 @@
-import favOn from '../img/fav-on.png'
-import favOff from '../img/fav-off.png'
+const favOn = new URL('../img/fav-on.png', import.meta.url)
+const favOff = new URL('../img/fav-off.png', import.meta.url)
 
 import gsap from "gsap"
 
@@ -41,7 +41,7 @@ class Content {
                 link.rel = 'icon';
                 document.getElementsByTagName('head')[0].appendChild(link);
             }
-            link.href = this.on ? favOn : favOff;
+            link.href = this.on ? favOn.pathname : favOff.pathname;
             this.on = !this.on
         }, 1000)
     }

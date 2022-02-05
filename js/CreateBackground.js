@@ -1,5 +1,5 @@
-import vert from '../assets/shader.vert'
-import frag from '../assets/shader.frag'
+const vert = new URL('../assets/shader.vert', import.meta.url)
+const frag = new URL('../assets/shader.frag', import.meta.url)
 import * as THREE from "three";
 
 
@@ -9,8 +9,8 @@ class createBackground{
     opt = opt || {}
     this.geometry = opt.geometry || new THREE.PlaneGeometry(2, 2, 1)
     this.material = new THREE.RawShaderMaterial({
-      vertexShader: vert,
-      fragmentShader: frag,
+      vertexShader: vert.pathname,
+      fragmentShader: frag.pathname,
       side: THREE.DoubleSide,
       uniforms: {
         aspectCorrection: { type: 'i', value: false },
